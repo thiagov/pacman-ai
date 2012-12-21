@@ -33,6 +33,27 @@ class ThiagovTeamFactory(AgentFactory):
 class Attacker(CaptureAgent):
   "Agente ofensivo simples."
 
+  def evaluate(gameState):
+    return 10
+
+  def cutoffTest(gameState, depth):
+    if depth == 0:
+      return true
+    return false
+
+  def expectiMinimax(player, self, gameState, depth):
+    if cutoffTest(gameState, depth):
+      return evaluate(gameState)
+    if player == "player":
+      alpha = float("-inf")
+      actions = gameState.getLegalActions(self.index)
+      for a in actions:
+        new_state = gameState.generateSuccessor(self.index, a)
+        max(alpha, expectiMinimax("chance", self, new_state, depth-1))
+    elif player == "chance":
+      alpha = 0
+      opponents = self.getOpponents(gameState)
+
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
 
@@ -43,24 +64,31 @@ class Attacker(CaptureAgent):
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
-    # Seleciona o pac-dot mais proximo no terreno inimigo.
-    mypos  = gameState.getAgentPosition(self.index)
     food   = self.getFood(gameState).asList() + self.getCapsules(gameState)
-    target = min(food, key = lambda x: self.getMazeDistance(mypos, x))
-      
-    # Expande os estados sucessores. 
-    # Funcao de avaliacao com base na distancia ao pac-dot.
-    actions = gameState.getLegalActions(self.index)
-    fvalues = []
-    for a in actions:
-      new_state = gameState.generateSuccessor(self.index, a)
-      newpos = new_state.getAgentPosition(self.index)
-      fvalues.append(self.getMazeDistance(newpos, target))
+    capsules = self.getCapsules(gameState)
 
-    # Seleciona aleatoriamente entre os estados empatados.
-    best = min(fvalues)
-    ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
-    return random.choice(ties)[1]
+    enemies  = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
+    print "===================="
+    print enemies[0]
+    return 'Stop'
+  # # Seleciona o pac-dot mais proximo no terreno inimigo.
+  # mypos  = gameState.getAgentPosition(self.index)
+  # food   = self.getFood(gameState).asList() + self.getCapsules(gameState)
+  # target = min(food, key = lambda x: self.getMazeDistance(mypos, x))
+  #
+  # # Expande os estados sucessores.
+  # # Funcao de avaliacao com base na distancia ao pac-dot.
+  # actions = gameState.getLegalActions(self.index)
+  # fvalues = []
+  # for a in actions:
+  #   new_state = gameState.generateSuccessor(self.index, a)
+  #   newpos = new_state.getAgentPosition(self.index)
+  #   fvalues.append(self.getMazeDistance(newpos, target))
+
+  # # Seleciona aleatoriamente entre os estados empatados.
+  # best = min(fvalues)
+  # ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
+  # return random.choice(ties)[1]
   
 class Defender(CaptureAgent):
   "Agente defensivo simples."
@@ -76,38 +104,43 @@ class Defender(CaptureAgent):
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
-    alpha = 1 # siga o adversario.
-    mypos = gameState.getAgentPosition(self.index)
-    
-    if mypos == self.target:
-      self.target = None
+    return "Stop"
+  # alpha = 1 # siga o adversario.
+  # mypos = gameState.getAgentPosition(self.index)
+  #
+  # if mypos == self.target:
+  #   self.target = None
 
-    # Se existir algum Pac-Man no campo de percepcao,
-    # defina target como a posicao do invasor mais proximo.
-    enemies  = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
-    invaders = filter(lambda x: x.isPacman and x.getPosition() != None, enemies)
-    if len(invaders) > 0:
-      positions = [agent.getPosition() for agent in invaders]
-      self.target = min(positions, key = lambda x: self.getMazeDistance(mypos, x))
-      if gameState.getAgentState(self.index).scaredTimer > 0:
-        alpha = -1 # fuja do adversario.
+  # # Se existir algum Pac-Man no campo de percepcao,
+  # # defina target como a posicao do invasor mais proximo.
+  # print "====================="
+  # x = self.getOpponents(gameState)
+  # print gameState.getAgentState(x[1])
 
-    # Nenhum inimigo a vista, selecione um pac-dot aleatorio para proteger.
-    if self.target == None:
-      food = self.getFoodYouAreDefending(gameState).asList() \
-           + self.getCapsulesYouAreDefending(gameState)
-      self.target = random.choice(food)
+  # enemies  = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
+  # invaders = filter(lambda x: x.isPacman and x.getPosition() != None, enemies)
+  # if len(invaders) > 0:
+  #   positions = [agent.getPosition() for agent in invaders]
+  #   self.target = min(positions, key = lambda x: self.getMazeDistance(mypos, x))
+  #   if gameState.getAgentState(self.index).scaredTimer > 0:
+  #     alpha = -1 # fuja do adversario.
 
-    # Expande os estados sucessores. 
-    # Funcao de avaliacao com base na distancia ao target.
-    actions = gameState.getLegalActions(self.index)
-    fvalues = []
-    for a in actions:
-      new_state = gameState.generateSuccessor(self.index, a)
-      newpos = new_state.getAgentPosition(self.index)
-      fvalues.append(alpha * self.getMazeDistance(newpos, self.target))
+  # # Nenhum inimigo a vista, selecione um pac-dot aleatorio para proteger.
+  # if self.target == None:
+  #   food = self.getFoodYouAreDefending(gameState).asList() \
+  #        + self.getCapsulesYouAreDefending(gameState)
+  #   self.target = random.choice(food)
 
-    # Seleciona aleatoriamente entre os estados empatados.
-    best = min(fvalues)
-    ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
-    return random.choice(ties)[1]
+  # # Expande os estados sucessores.
+  # # Funcao de avaliacao com base na distancia ao target.
+  # actions = gameState.getLegalActions(self.index)
+  # fvalues = []
+  # for a in actions:
+  #   new_state = gameState.generateSuccessor(self.index, a)
+  #   newpos = new_state.getAgentPosition(self.index)
+  #   fvalues.append(alpha * self.getMazeDistance(newpos, self.target))
+
+  # # Seleciona aleatoriamente entre os estados empatados.
+  # best = min(fvalues)
+  # ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
+  # return random.choice(ties)[1]
