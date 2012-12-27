@@ -1,5 +1,6 @@
 from captureAgents import CaptureAgent
 from captureAgents import AgentFactory
+from game import Directions
 import random
 
 #############
@@ -33,26 +34,26 @@ class ThiagovTeamFactory(AgentFactory):
 class Attacker(CaptureAgent):
   "Agente ofensivo simples."
 
-  def evaluate(gameState):
-    return 10
-
-  def cutoffTest(gameState, depth):
-    if depth == 0:
-      return true
-    return false
-
-  def expectiMinimax(player, self, gameState, depth):
-    if cutoffTest(gameState, depth):
-      return evaluate(gameState)
-    if player == "player":
-      alpha = float("-inf")
-      actions = gameState.getLegalActions(self.index)
-      for a in actions:
-        new_state = gameState.generateSuccessor(self.index, a)
-        max(alpha, expectiMinimax("chance", self, new_state, depth-1))
-    elif player == "chance":
-      alpha = 0
-      opponents = self.getOpponents(gameState)
+  def randomSimulation(self, depth, gameState):
+    new_state = gameState.deepCopy()
+    while depth > 0:
+      #pega jogadas validas
+      actions = new_state.getLegalActions(self.index)
+      #nao queremos o agente parado na simulacao
+      actions.remove(Directions.STOP)
+      current_direction = new_state.getAgentState(self.index).configuration.direction
+      #nao queremos o agente indo e voltando na simulacao
+      reversed_direction = Directions.REVERSE[new_state.getAgentState(self.index).configuration.direction]
+      if reversed_direction in actions and len(actions) > 1:
+        actions.remove(reversed_direction)
+      #escolhe a acao aleatoriamente
+      a = random.choice(actions)
+      #print new_state
+      #print actions
+      new_state = new_state.generateSuccessor(self.index, a)
+      depth -= 1
+    #calcula e retorna valor da jogada
+    return self.getScore(new_state)
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
@@ -66,11 +67,30 @@ class Attacker(CaptureAgent):
   def chooseAction(self, gameState):
     food   = self.getFood(gameState).asList() + self.getCapsules(gameState)
     capsules = self.getCapsules(gameState)
-
     enemies  = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
-    print "===================="
-    print enemies[0]
-    return 'Stop'
+
+    actions = gameState.getLegalActions(self.index)
+    #last_observation = self.getPreviousObservation()
+    #if last_observation:
+    #  reversed_direction = Directions.REVERSE[last_observation.getAgentState(self.index).configuration.direction]
+    #  if reversed_direction in actions and len(actions) > 1:
+    #    actions.remove(reversed_direction)
+
+    fvalues = []
+    for a in actions:
+      new_state = gameState.generateSuccessor(self.index, a)
+      value = 0
+      for i in range(1,21):
+        value += self.randomSimulation(10, new_state)
+      fvalues.append(value)
+    #print fvalues
+    #print current_direction
+    #print reversed_direction
+    #return 'Stop'
+
+    best = max(fvalues)
+    ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
+    return random.choice(ties)[1]
   # # Seleciona o pac-dot mais proximo no terreno inimigo.
   # mypos  = gameState.getAgentPosition(self.index)
   # food   = self.getFood(gameState).asList() + self.getCapsules(gameState)
