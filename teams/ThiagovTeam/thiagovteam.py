@@ -62,6 +62,7 @@ class Attacker(CaptureAgent):
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
+    print gameState.getWalls()
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
