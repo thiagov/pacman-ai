@@ -61,7 +61,9 @@ class Attacker(CaptureAgent):
     if len(in_range) > 0:
       positions = [agent.getPosition() for agent in in_range]
       closest = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
-      features['distanceToGhost'] = self.getMazeDistance(myPos, closest)
+      closestDist = self.getMazeDistance(myPos, closest)
+      if closestDist <= 5:
+        features['distanceToGhost'] = closestDist
 
     # Compute distance to ally
     team = self.getTeam(successor)
@@ -79,18 +81,19 @@ class Attacker(CaptureAgent):
     in_range = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
     if len(in_range) > 0:
       positions = [agent.getPosition() for agent in in_range]
-      min_dist = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
-      closest_enemies = filter(lambda x: x[0] == min_dist, zip(positions, in_range))
+      closestPos = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
+      closestDist = self.getMazeDistance(myPos, closestPos)
+      closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, in_range))
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
           # If opponent is scared, the agent should not care about distanceToGhost.
-          return {'successorScore': 3, 'distanceToFood': -1, 'distanceToCapsule': -0.5, 'distanceToGhost': 0, 'distanceToAlly': 2}
-      # If agent is being persued, the agent should focus on surviving: it should
-      # give priority to distanceToCapsule and distanceToGhost
-      return {'successorScore': 3, 'distanceToFood': -1, 'distanceToCapsule': -5, 'distanceToGhost': 5, 'distanceToAlly': 2}
-    else:
-      # Normal weights
-      return {'successorScore': 3, 'distanceToFood': -1, 'distanceToCapsule': -0.5, 'distanceToGhost': 1, 'distanceToAlly': 2}
+          return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': -0.5, 'distanceToGhost': 0, 'distanceToAlly': 2}
+      if closestDist <= 5:
+        # If agent is being persued, the agent should focus on surviving: it should
+        # give priority to distanceToCapsule and distanceToGhost
+        return {'successorScore': 5, 'distanceToFood': -1, 'distanceToCapsule': -5, 'distanceToGhost': 10, 'distanceToAlly': 1}
+    # Normal weights
+    return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': -0.5, 'distanceToGhost': 1, 'distanceToAlly': 2}
 
   def getSuccessor(self, gameState, action):
     """
@@ -110,7 +113,9 @@ class Attacker(CaptureAgent):
     """
     features = self.getFeatures(gameState, action)
     weights = self.getWeights(gameState, action)
-    print features
+    #print action
+    #print features
+    #print weights
     return features * weights
 
   def __init__(self, index):
@@ -128,9 +133,13 @@ class Attacker(CaptureAgent):
   def chooseAction(self, gameState):
     actions = gameState.getLegalActions(self.index)
     values = [self.evaluate(gameState, a) for a in actions]
+    #print zip(actions, values)
     maxValue = max(values)
     bestActions = [a for a, v in zip(actions, values) if v == maxValue]
-    return random.choice(bestActions)
+
+    x = random.choice(bestActions)
+    #print x
+    return x
  
 class Defender(CaptureAgent):
   "Agente defensivo simples."
