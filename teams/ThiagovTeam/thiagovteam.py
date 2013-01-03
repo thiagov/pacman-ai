@@ -48,11 +48,18 @@ class Attacker(CaptureAgent):
       features['distanceToFood'] = minDistance
 
     # Compute distance to the nearest capsule
-    capsuleList = self.getCapsules(successor)
-    if len(capsuleList) > 0:
+    oldCapsuleList = self.getCapsules(gameState)
+    if len(oldCapsuleList) > 0:
       myPos = successor.getAgentState(self.index).getPosition()
-      minDistance = min([self.getMazeDistance(myPos, capsule) for capsule in capsuleList])
-      features['distanceToCapsule'] = minDistance
+      oldMinPosition = min(oldCapsuleList, key = lambda x: self.getMazeDistance(myPos, x))
+      if oldMinPosition == myPos:
+        features['distanceToCapsule'] = 0
+      else:
+        capsuleList = self.getCapsules(successor)
+        if len(capsuleList) > 0:
+          myPos = successor.getAgentState(self.index).getPosition()
+          minDistance = min([self.getMazeDistance(myPos, capsule) for capsule in capsuleList])
+          features['distanceToCapsule'] = minDistance
 
     # Compute distance to closest ghost
     myPos = successor.getAgentState(self.index).getPosition()
@@ -65,6 +72,9 @@ class Attacker(CaptureAgent):
       if closestDist <= 5:
         features['distanceToGhost'] = closestDist
 
+    # Verify if actions is to stay put
+    features['isStop'] = 1 if action == Directions.STOP else 0
+
     # Compute distance to ally
     team = self.getTeam(successor)
     team.remove(self.index)
@@ -72,6 +82,7 @@ class Attacker(CaptureAgent):
     ally_position = ally.getPosition()
     ally_dist = self.getMazeDistance(myPos, ally_position)
     features['distanceToAlly'] = ally_dist
+
     return features
 
   def getWeights(self, gameState, action):
@@ -87,13 +98,13 @@ class Attacker(CaptureAgent):
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
           # If opponent is scared, the agent should not care about distanceToGhost.
-          return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': -0.5, 'distanceToGhost': 0, 'distanceToAlly': 2}
+          return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': 0, 'distanceToGhost': 0, 'distanceToAlly': 2, 'isStop': 0}
       if closestDist <= 5:
         # If agent is being persued, the agent should focus on surviving: it should
-        # give priority to distanceToCapsule and distanceToGhost
-        return {'successorScore': 5, 'distanceToFood': -1, 'distanceToCapsule': -5, 'distanceToGhost': 10, 'distanceToAlly': 1}
+        # give priority to distanceToCapsule and distanceToGhost, and it should not stay put
+        return {'successorScore': 5, 'distanceToFood': -1, 'distanceToCapsule': -50, 'distanceToGhost': 100, 'distanceToAlly': 0, 'isStop': -200}
     # Normal weights
-    return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': -0.5, 'distanceToGhost': 1, 'distanceToAlly': 2}
+    return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': 0, 'distanceToGhost': 1, 'distanceToAlly': 2, 'isStop': 0}
 
   def getSuccessor(self, gameState, action):
     """
@@ -144,9 +155,57 @@ class Attacker(CaptureAgent):
 class Defender(CaptureAgent):
   "Agente defensivo simples."
 
-  def __init__(self, index):
-    CaptureAgent.__init__(self, index)
-    self.target = None
+  def getFeatures(self, gameState, action):
+    features = util.Counter()
+    successor = self.getSuccessor(gameState, action)
+
+    myState = successor.getAgentState(self.index)
+    myPos = myState.getPosition()
+
+    # Computes whether we're on defense (1) or offense (0)
+    features['onDefense'] = 1
+    if myState.isPacman: features['onDefense'] = 0
+
+    # Computes distance to invaders we can see
+    enemies = [successor.getAgentState(i) for i in self.getOpponents(successor)]
+    invaders = [a for a in enemies if a.isPacman and a.getPosition() != None]
+    features['numInvaders'] = len(invaders)
+    if len(invaders) > 0:
+      dists = [self.getMazeDistance(myPos, a.getPosition()) for a in invaders]
+      features['invaderDistance'] = min(dists)
+
+    if action == Directions.STOP: features['stop'] = 1
+    rev = Directions.REVERSE[gameState.getAgentState(self.index).configuration.direction]
+    if action == rev: features['reverse'] = 1
+
+    return features
+
+
+  def getWeights(self, gameState, action):
+    return {'numInvaders': -1000, 'onDefense': 100, 'invaderDistance': -10, 'stop': -100, 'reverse': -2}
+
+  def getSuccessor(self, gameState, action):
+    """
+    Finds the next successor which is a grid position (location tuple).
+    """
+    successor = gameState.generateSuccessor(self.index, action)
+    pos = successor.getAgentState(self.index).getPosition()
+    if pos != nearestPoint(pos):
+      # Only half a grid position was covered
+      return successor.generateSuccessor(self.index, action)
+    else:
+      return successor
+
+  def evaluate(self, gameState, action):
+    """
+    Computes a linear combination of features and feature weights
+    """
+    features = self.getFeatures(gameState, action)
+    weights = self.getWeights(gameState, action)
+    #print action
+    #print features
+    #print weights
+    return features * weights
 
   # Implemente este metodo para pre-processamento (15s max).
   def registerInitialState(self, gameState):
@@ -155,7 +214,20 @@ class Defender(CaptureAgent):
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
-    return "Stop"
+    actions = gameState.getLegalActions(self.index)
+    values = [self.evaluate(gameState, a) for a in actions]
+    maxValue = max(values)
+    bestActions = [a for a, v in zip(actions, values) if v == maxValue]
+
+    x = random.choice(bestActions)
+    return x
+
+  def __init__(self, index):
+    CaptureAgent.__init__(self, index)
+    #self.target = None
+
+  # Implemente este metodo para controlar o agente (1s max).
+  #def chooseAction(self, gameState):
   # alpha = 1 # siga o adversario.
   # mypos = gameState.getAgentPosition(self.index)
   #
