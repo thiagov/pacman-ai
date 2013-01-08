@@ -99,7 +99,7 @@ class Attacker(CaptureAgent):
         if agent[1].scaredTimer > 0:
           # If opponent is scared, the agent should not care about distanceToGhost.
           return {'successorScore': 100, 'distanceToFood': -3, 'distanceToCapsule': 0, 'distanceToGhost': 0, 'distanceToAlly': 2, 'isStop': 0}
-      if closestDist <= 5:
+      if closestDist <= 5 and successor.getAgentState(self.index).isPacman:
         # If agent is being persued, the agent should focus on surviving: it should
         # give priority to distanceToCapsule and distanceToGhost, and it should not stay put
         return {'successorScore': 5, 'distanceToFood': -1, 'distanceToCapsule': -50, 'distanceToGhost': 100, 'distanceToAlly': 0, 'isStop': -200}
@@ -127,7 +127,49 @@ class Attacker(CaptureAgent):
     #print action
     #print features
     #print weights
+    #print features * weights
     return features * weights
+
+  def cutoffTest(self, gameState, depth):
+    if depth == 0 or gameState.isOver():
+      return True
+    return False
+
+  def minimax(self, gameState, action, depth, agentIndex, alpha, beta):
+    if self.cutoffTest(gameState, depth):
+      return self.evaluate(gameState, action)
+
+    try:
+      # Perform the given action
+      actedGameState = gameState.generateSuccessor(agentIndex, action)
+      nextAgentIndex = (agentIndex + 1) % gameState.getNumAgents()
+      legalActions = actedGameState.getLegalActions(nextAgentIndex)
+      # If the next agent is very far away, it's not worth the extra time to consider his actions; just assume he won't move
+      if self.distancer.getDistance(gameState.getAgentPosition(agentIndex), gameState.getAgentPosition(nextAgentIndex)) > (depth * 3):
+        legalActions = [Directions.STOP]
+    except:
+      actedGameState = gameState
+      nextAgentIndex = (agentIndex + 1) % gameState.getNumAgents()
+      legalActions = []
+
+    if gameState.isOnRedTeam(agentIndex) == gameState.isOnRedTeam(self.index):
+      # Max node
+      maxValue = alpha
+      for act in legalActions:
+        stateValue = self.minimax(actedGameState, act, depth - 1, nextAgentIndex, maxValue, beta)
+        maxValue = max(maxValue, stateValue)
+        if maxValue >= beta:
+          break
+      return maxValue
+    else:
+      # Min node
+      minValue = beta
+      for act in legalActions:
+        stateValue = self.minimax(actedGameState, act, depth - 1, nextAgentIndex, alpha, minValue)
+        minValue = min(minValue, stateValue)
+        if minValue <= alpha:
+          break
+      return minValue
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
@@ -136,15 +178,36 @@ class Attacker(CaptureAgent):
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
-    #print gameState.data.layout
-    #print  dir(gameState)
-    #print gameState.getWalls()
+    #self.badPositions = []
+    #self.badPositionRadius = 1
+    #self.eatenFood = 0
+    #self.entrancePosition = None
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
+    #last_observation = self.getPreviousObservation()
+    #if last_observation and last_observation.getAgentState(self.index).isPacman and not gameState.getAgentState(self.index).isPacman:
+    #  print "Virei fantasma"
+    #  if self.eatenFood == 0:
+    #    self.badPositions.append(self.entrancePosition)
+    #    for i in range(1, self.badPositionRadius + 1):
+    #      self.badPositions.append((self.entrancePosition[0], self.entrancePosition[1] + 1.0))
+    #      self.badPositions.append((self.entrancePosition[0], self.entrancePosition[1] - 1.0))
+    #elif last_observation and not last_observation.getAgentState(self.index).isPacman and gameState.getAgentState(self.index).isPacman:
+    #  print "Virei pacman"
+    #  self.entrancePosition = gameState.getAgentState(self.index).getPosition()
+    #  self.eatenFood = 0
+    #  self.badPositions = []
+
+    #actions = gameState.getLegalActions(self.index)
+    #values = [self.evaluate(gameState, a) for a in actions]
+    ##print zip(actions, values)
+    #maxValue = max(values)
+    #bestActions = [a for a, v in zip(actions, values) if v == maxValue]
+
+
     actions = gameState.getLegalActions(self.index)
-    values = [self.evaluate(gameState, a) for a in actions]
-    #print zip(actions, values)
+    values = [self.minimax(gameState, act, 5, self.index, "-inf", "+inf") for act in actions]
     maxValue = max(values)
     bestActions = [a for a, v in zip(actions, values) if v == maxValue]
 
