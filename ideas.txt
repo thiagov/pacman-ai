@@ -1,0 +1,3 @@
+Calcular avaliação depois de percorrer profundiade x caso não haja oponente visível;
+caso haja oponente visível, usar minimax;
+ao inves de closest food usar target food;
