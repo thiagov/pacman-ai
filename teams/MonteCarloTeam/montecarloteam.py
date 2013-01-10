@@ -166,7 +166,7 @@ class Attacker(EvaluationBasedAgent):
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
     # You can profile your evaluation time by uncommenting these lines
-    start = time.time()
+    #start = time.time()
 
     # Stores the agent position. This value will be used in the state evaluation.
     self.lastPosition = gameState.getAgentState(self.index).getPosition()
@@ -199,7 +199,7 @@ class Attacker(EvaluationBasedAgent):
     ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
     toPlay = random.choice(ties)[1]
 
-    print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
+    #print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
     return toPlay
  
 class Defender(CaptureAgent):
@@ -208,6 +208,7 @@ class Defender(CaptureAgent):
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
     self.target = None
+    self.lastObservedFood = None
 
   # Implemente este metodo para pre-processamento (15s max).
   def registerInitialState(self, gameState):
@@ -216,6 +217,8 @@ class Defender(CaptureAgent):
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
+    print self.getScore(gameState)
+
     alpha = 1 # siga o adversario.
     mypos = gameState.getAgentPosition(self.index)
    
@@ -233,7 +236,17 @@ class Defender(CaptureAgent):
       self.target = min(positions, key = lambda x: self.getMazeDistance(mypos, x))
       if gameState.getAgentState(self.index).scaredTimer > 0:
         alpha = -1 # fuja do adversario.
+    # Se nao existir um pacman no campo de percepcao,
+    # mas nossos pacdots estiverem sumindo, va na direcao
+    # dos pacdots desaparecidos
+    elif self.lastObservedFood != None:
+      eaten = set(self.lastObservedFood) - set(self.getFoodYouAreDefending(gameState).asList())
+      if len(eaten) > 0:
+        self.target = eaten.pop()
 
+    self.lastObservedFood = self.getFoodYouAreDefending(gameState).asList()
+
+    #print gameState.data.layout.width
     # Nenhum inimigo a vista, selecione um pac-dot aleatorio para proteger.
     if self.target == None:
       food = self.getFoodYouAreDefending(gameState).asList() \
