@@ -12,7 +12,7 @@ from util import nearestPoint
 ###############################################
 
 class MonteCarloFactory(AgentFactory):
-  "Gera um time ThiagovTeam"
+  "Gera um time MonteCarloTeam"
 
   def __init__(self, isRed):
     AgentFactory.__init__(self, isRed)        
@@ -72,11 +72,13 @@ class Attacker(EvaluationBasedAgent):
   def getFeatures(self, gameState, action):
     features = util.Counter()
     successor = self.getSuccessor(gameState, action)
+
+    # Compute score from successor state
     features['successorScore'] = self.getScore(successor)
 
     # Compute distance to the nearest food
     foodList = self.getFood(successor).asList()
-    if len(foodList) > 0: # This should always be True,  but better safe than sorry
+    if len(foodList) > 0:
       myPos = successor.getAgentState(self.index).getPosition()
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       features['distanceToFood'] = minDistance
@@ -84,9 +86,9 @@ class Attacker(EvaluationBasedAgent):
     # Compute distance to closest ghost
     myPos = successor.getAgentState(self.index).getPosition()
     enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
-    in_range = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
-    if len(in_range) > 0:
-      positions = [agent.getPosition() for agent in in_range]
+    inRange = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
+    if len(inRange) > 0:
+      positions = [agent.getPosition() for agent in inRange]
       closest = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
       closestDist = self.getMazeDistance(myPos, closest)
       if closestDist <= 5:
@@ -96,9 +98,9 @@ class Attacker(EvaluationBasedAgent):
     team = self.getTeam(successor)
     team.remove(self.index)
     ally = successor.getAgentState(team[0])
-    ally_position = ally.getPosition()
-    ally_dist = self.getMazeDistance(myPos, ally_position)
-    features['distanceToAlly'] = ally_dist
+    allyPosition = ally.getPosition()
+    allyDist = self.getMazeDistance(myPos, allyPosition)
+    features['distanceToAlly'] = allyDist
 
     # Compute walked distance
     features['walkedDist'] = self.getMazeDistance(myPos, self.lastPosition)
@@ -109,45 +111,45 @@ class Attacker(EvaluationBasedAgent):
     return features
 
   def getWeights(self, gameState, action):
-    # Se o agente esta travado, ele para de se esconder
+    # If tha agent is locked, we will make him try and atack
     if self.inactiveTime > 80:
-      print "To travado =("
       return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 1000}
 
+    # If opponent is scared, the agent should not care about distanceToGhost
     successor = self.getSuccessor(gameState, action)
     myPos = successor.getAgentState(self.index).getPosition()
     enemies  = [successor.getAgentState(i) for i in self.getOpponents(successor)]
-    in_range = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
-    if len(in_range) > 0:
-      positions = [agent.getPosition() for agent in in_range]
+    inRange = filter(lambda x: not x.isPacman and x.getPosition() != None, enemies)
+    if len(inRange) > 0:
+      positions = [agent.getPosition() for agent in inRange]
       closestPos = min(positions, key = lambda x: self.getMazeDistance(myPos, x))
       closestDist = self.getMazeDistance(myPos, closestPos)
-      closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, in_range))
+      closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, inRange))
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
-          # If opponent is scared, the agent should not care about distanceToGhost.
           return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
+
+    # Weights normally used
     return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
 
   def randomSimulation(self, depth, gameState):
     new_state = gameState.deepCopy()
     while depth > 0:
-      #pega jogadas validas
+      # Get valid actions
       actions = new_state.getLegalActions(self.index)
-      #nao queremos o agente parado na simulacao
+      # The agent should not stay put in the simulation
       actions.remove(Directions.STOP)
       current_direction = new_state.getAgentState(self.index).configuration.direction
-      #nao queremos o agente indo e voltando na simulacao
+      # The agent should not use the reverse direction during simulation
       reversed_direction = Directions.REVERSE[new_state.getAgentState(self.index).configuration.direction]
       if reversed_direction in actions and len(actions) > 1:
         actions.remove(reversed_direction)
-      #escolhe a acao aleatoriamente
+      # Randomly chooses a valid action
       a = random.choice(actions)
-      #print new_state
-      #print actions
+      # Compute new state and update depth
       new_state = new_state.generateSuccessor(self.index, a)
       depth -= 1
-    #calcula e retorna valor da jogada
+    # Evaluate the final simulation state
     return self.evaluate(new_state, Directions.STOP)
 
   def __init__(self, index):
@@ -157,27 +159,31 @@ class Attacker(EvaluationBasedAgent):
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
+    # Variables used to verify if the agent os locked
     self.numEnemyFood = "+inf"
     self.inactiveTime = 0
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
-    # Armazena a posicao do agente antes das simulacoes para utilizar na avaliacao
+    # You can profile your evaluation time by uncommenting these lines
+    start = time.time()
+
+    # Stores the agent position. This value will be used in the state evaluation.
     self.lastPosition = gameState.getAgentState(self.index).getPosition()
 
-    # Computa a quantas jogadas o agente nao come um pacdot
+    # Updates inactiveTime. This variable indicates if the agent is locked.
     currentEnemyFood = len(self.getFood(gameState).asList())
     if self.numEnemyFood != currentEnemyFood:
       self.numEnemyFood = currentEnemyFood
       self.inactiveTime = 0
     else:
       self.inactiveTime += 1
-    # Se o agente morreu, entao resetamos o inactiveTime
+    # If the agent dies, inactiveTime is reseted.
     if gameState.getInitialAgentPosition(self.index) == gameState.getAgentState(self.index).getPosition():
       self.inactiveTime = 0
 
-    # You can profile your evaluation time by uncommenting these lines
-    #start = time.time()
+    # Get valid actions. Staying put is almost never a good choice, so
+    # the agent will ignore this action.
     actions = gameState.getLegalActions(self.index)
     actions.remove(Directions.STOP)
 
@@ -192,7 +198,8 @@ class Attacker(EvaluationBasedAgent):
     best = max(fvalues)
     ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
     toPlay = random.choice(ties)[1]
-    #print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
+
+    print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
     return toPlay
  
 class Defender(CaptureAgent):
