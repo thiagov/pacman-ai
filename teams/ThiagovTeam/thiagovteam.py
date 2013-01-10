@@ -150,7 +150,7 @@ class Attacker(CaptureAgent):
     except:
       actedGameState = gameState
       nextAgentIndex = (agentIndex + 1) % gameState.getNumAgents()
-      legalActions = []
+      legalActions = [Directions.STOP]
 
     if gameState.isOnRedTeam(agentIndex) == gameState.isOnRedTeam(self.index):
       # Max node
@@ -205,9 +205,9 @@ class Attacker(CaptureAgent):
     #maxValue = max(values)
     #bestActions = [a for a, v in zip(actions, values) if v == maxValue]
 
-
     actions = gameState.getLegalActions(self.index)
     values = [self.minimax(gameState, act, 5, self.index, "-inf", "+inf") for act in actions]
+    print zip(actions, values)
     maxValue = max(values)
     bestActions = [a for a, v in zip(actions, values) if v == maxValue]
 
