@@ -109,9 +109,10 @@ class Attacker(EvaluationBasedAgent):
     return features
 
   def getWeights(self, gameState, action):
-    if self.inactiveTime > 100:
+    # Se o agente esta travado, ele para de se esconder
+    if self.inactiveTime > 80:
       print "To travado =("
-      return {'successorScore': 100, 'distanceToFood': 5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1}
+      return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 1000}
 
     successor = self.getSuccessor(gameState, action)
     myPos = successor.getAgentState(self.index).getPosition()
@@ -125,8 +126,8 @@ class Attacker(EvaluationBasedAgent):
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
           # If opponent is scared, the agent should not care about distanceToGhost.
-          return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1}
-    return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1}
+          return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
+    return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
 
   def randomSimulation(self, depth, gameState):
     new_state = gameState.deepCopy()
