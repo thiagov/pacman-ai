@@ -124,10 +124,6 @@ class Attacker(CaptureAgent):
     """
     features = self.getFeatures(gameState, action)
     weights = self.getWeights(gameState, action)
-    #print action
-    #print features
-    #print weights
-    #print features * weights
     return features * weights
 
   def cutoffTest(self, gameState, depth):
@@ -199,20 +195,18 @@ class Attacker(CaptureAgent):
     #  self.eatenFood = 0
     #  self.badPositions = []
 
-    #actions = gameState.getLegalActions(self.index)
-    #values = [self.evaluate(gameState, a) for a in actions]
-    ##print zip(actions, values)
-    #maxValue = max(values)
-    #bestActions = [a for a, v in zip(actions, values) if v == maxValue]
-
     actions = gameState.getLegalActions(self.index)
-    values = [self.minimax(gameState, act, 5, self.index, "-inf", "+inf") for act in actions]
-    print zip(actions, values)
+    values = [self.evaluate(gameState, a) for a in actions]
+    #print zip(actions, values)
     maxValue = max(values)
     bestActions = [a for a, v in zip(actions, values) if v == maxValue]
 
+    #actions = gameState.getLegalActions(self.index)
+    #values = [self.minimax(gameState, act, 5, self.index, "-inf", "+inf") for act in actions]
+    #maxValue = max(values)
+    #bestActions = [a for a, v in zip(actions, values) if v == maxValue]
+
     x = random.choice(bestActions)
-    #print x
     return x
  
 class Defender(CaptureAgent):
@@ -265,9 +259,6 @@ class Defender(CaptureAgent):
     """
     features = self.getFeatures(gameState, action)
     weights = self.getWeights(gameState, action)
-    #print action
-    #print features
-    #print weights
     return features * weights
 
   # Implemente este metodo para pre-processamento (15s max).
