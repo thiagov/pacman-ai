@@ -113,7 +113,7 @@ class Attacker(EvaluationBasedAgent):
   def getWeights(self, gameState, action):
     # If tha agent is locked, we will make him try and atack
     if self.inactiveTime > 80:
-      return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 1000}
+      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 1000}
 
     # If opponent is scared, the agent should not care about distanceToGhost
     successor = self.getSuccessor(gameState, action)
@@ -127,10 +127,10 @@ class Attacker(EvaluationBasedAgent):
       closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, inRange))
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
-          return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
+          return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
 
     # Weights normally used
-    return {'successorScore': 100, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
+    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
 
   def randomSimulation(self, depth, gameState):
     new_state = gameState.deepCopy()
@@ -192,7 +192,7 @@ class Attacker(EvaluationBasedAgent):
       new_state = gameState.generateSuccessor(self.index, a)
       value = 0
       for i in range(1,31):
-        value += self.randomSimulation(3, new_state)
+        value += self.randomSimulation(6, new_state)
       fvalues.append(value)
 
     best = max(fvalues)
