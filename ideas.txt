@@ -1,3 +1,14 @@
+- Mudar distancia para comida mais proxima para algo mais significativo, como
+distancia para locais com mais comida?
+
+
+
+
+
+
+
+Descartadas:
+
 - Se uma ação leva o pacman a um beco, não simular essa ação e ignorá-la no chooseAction;
   x Identificar becos apenas a 1 de profundidade ou fazer uma verificação recursiva de profundidade x?
-
+Ruim. O monte carlo com mais simulações e profundidade deve resolver.

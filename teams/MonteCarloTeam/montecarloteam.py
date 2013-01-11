@@ -217,7 +217,6 @@ class Defender(CaptureAgent):
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
-    print self.getScore(gameState)
 
     alpha = 1 # siga o adversario.
     mypos = gameState.getAgentPosition(self.index)
@@ -246,7 +245,6 @@ class Defender(CaptureAgent):
 
     self.lastObservedFood = self.getFoodYouAreDefending(gameState).asList()
 
-    #print gameState.data.layout.width
     # Nenhum inimigo a vista, selecione um pac-dot aleatorio para proteger.
     if self.target == None:
       food = self.getFoodYouAreDefending(gameState).asList() \
