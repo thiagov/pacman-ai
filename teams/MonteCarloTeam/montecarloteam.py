@@ -40,7 +40,6 @@ class EvaluationBasedAgent(CaptureAgent):
     successor = gameState.generateSuccessor(self.index, action)
     pos = successor.getAgentState(self.index).getPosition()
     if pos != nearestPoint(pos):
-      # Only half a grid position was covered
       return successor.generateSuccessor(self.index, action)
     else:
       return successor
@@ -51,9 +50,6 @@ class EvaluationBasedAgent(CaptureAgent):
     """
     features = self.getFeatures(gameState, action)
     weights = self.getWeights(gameState, action)
-    #print action
-    #print features
-    #print weights
     return features * weights
 
   def getFeatures(self, gameState, action):
@@ -67,9 +63,13 @@ class EvaluationBasedAgent(CaptureAgent):
 
 
 class Attacker(EvaluationBasedAgent):
-  "Agente ofensivo simples."
+  "Agente ofensivo."
 
   def getFeatures(self, gameState, action):
+    """
+    Get features used for state evaluation.
+    """
+
     features = util.Counter()
     successor = self.getSuccessor(gameState, action)
 
@@ -94,14 +94,6 @@ class Attacker(EvaluationBasedAgent):
       if closestDist <= 5:
         features['distanceToGhost'] = closestDist
 
-    # Compute distance to ally
-    team = self.getTeam(successor)
-    team.remove(self.index)
-    ally = successor.getAgentState(team[0])
-    allyPosition = ally.getPosition()
-    allyDist = self.getMazeDistance(myPos, allyPosition)
-    features['distanceToAlly'] = allyDist
-
     # Compute walked distance
     features['walkedDist'] = self.getMazeDistance(myPos, self.lastPosition)
 
@@ -111,9 +103,12 @@ class Attacker(EvaluationBasedAgent):
     return features
 
   def getWeights(self, gameState, action):
+    """
+    Get weights for the features used in the evaluation.
+    """
     # If tha agent is locked, we will make him try and atack
     if self.inactiveTime > 80:
-      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 1000}
+      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'walkedDist': 1, 'isPacman': 1000}
 
     # If opponent is scared, the agent should not care about distanceToGhost
     successor = self.getSuccessor(gameState, action)
@@ -127,12 +122,17 @@ class Attacker(EvaluationBasedAgent):
       closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, inRange))
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
-          return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
+          return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'walkedDist': 1, 'isPacman': 0}
 
     # Weights normally used
-    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'distanceToAlly': 0, 'walkedDist': 1, 'isPacman': 0}
+    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'walkedDist': 1, 'isPacman': 0}
 
   def randomSimulation(self, depth, gameState):
+    """
+    Random simulate some actions for the agent. The actions other agents can take
+    are ignored, or, in other words, we consider their actions is always STOP.
+    The final state from the simulation is evaluated.
+    """
     new_state = gameState.deepCopy()
     while depth > 0:
       # Get valid actions
@@ -154,14 +154,14 @@ class Attacker(EvaluationBasedAgent):
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
+    # Variables used to verify if the agent os locked
+    self.numEnemyFood = "+inf"
+    self.inactiveTime = 0
 
   # Implemente este metodo para pre-processamento (15s max).
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
-    # Variables used to verify if the agent os locked
-    self.numEnemyFood = "+inf"
-    self.inactiveTime = 0
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
@@ -199,27 +199,39 @@ class Attacker(EvaluationBasedAgent):
     ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
     toPlay = random.choice(ties)[1]
 
-    #print 'eval time for agent %d: %.4f' % (self.index, time.time() - start)
+    #print 'eval time for offensive agent %d: %.4f' % (self.index, time.time() - start)
     return toPlay
  
 class Defender(CaptureAgent):
-  "Agente defensivo simples."
+  "Agente defensivo."
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
     self.target = None
     self.lastObservedFood = None
+    # This variable will store our patrol points and
+    # the agent probability to select a point as target.
     self.patrolDict = {}
 
   def distFoodToPatrol(self, gameState):
+    """
+    This method calculates the minimum distance from our patrol
+    points to our pacdots. The inverse of this distance will
+    be used as the probability to select the patrol point as
+    target.
+    """
     food = self.getFoodYouAreDefending(gameState).asList()
     total = 0
+
     #for position in self.noWallSpots:
     #  dist = 0
     #  for foodPos in food:
     #    dist += self.getMazeDistance(position, foodPos)
     #  self.patrolDict[position] = dist
     #  total += dist
+
+    # Get the minimum distance from the food to our
+    # patrol points.
     for position in self.noWallSpots:
       closestFoodDist = "+inf"
       for foodPos in food:
@@ -228,13 +240,14 @@ class Defender(CaptureAgent):
           closestFoodDist = dist
       self.patrolDict[position] = 1.0/float(closestFoodDist)
       total += self.patrolDict[position]
-
-    print self.patrolDict
+    # Normalize the value used as probability.
     for x in self.patrolDict.keys():
       self.patrolDict[x] = float(self.patrolDict[x])/float(total)
-    print self.patrolDict
 
   def selectPatrolTarget(self):
+    """
+    Select some patrol point to use as target.
+    """
     rand = random.random()
     sum = 0.0
     for x in self.patrolDict.keys():
@@ -246,7 +259,6 @@ class Defender(CaptureAgent):
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
-
     # Compute central positions without walls from map layout.
     # The defender will walk among these positions to defend
     # its territory.
@@ -258,61 +270,59 @@ class Defender(CaptureAgent):
     for i in range(1, gameState.data.layout.height - 1):
       if not gameState.hasWall(centralX, i):
         self.noWallSpots.append((centralX, i))
-
     # Remove some positions. The agent do not need to patrol
     # all positions in the central area.
-    print len(self.noWallSpots)
     while len(self.noWallSpots) > (gameState.data.layout.height -2)/2:
       self.noWallSpots.pop(0)
       self.noWallSpots.pop(len(self.noWallSpots)-1)
-    print len(self.noWallSpots)
-
+    # Update probabilities to each patrol point.
     self.distFoodToPatrol(gameState)
 
 
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
+    # You can profile your evaluation time by uncommenting these lines
+    #start = time.time()
 
+    # If some of our food was eaten, we need to update
+    # our patrol points probabilities.
     if self.lastObservedFood and len(self.lastObservedFood) != len(self.getFoodYouAreDefending(gameState).asList()):
       self.distFoodToPatrol(gameState)
 
     mypos = gameState.getAgentPosition(self.index)
-   
     if mypos == self.target:
       self.target = None
 
-    # Se existir algum Pac-Man no campo de percepcao,
-    # defina target como a posicao do invasor mais proximo.
+    # If we can see an invader, we go after him.
     x = self.getOpponents(gameState)
     enemies  = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
     invaders = filter(lambda x: x.isPacman and x.getPosition() != None, enemies)
     if len(invaders) > 0:
       positions = [agent.getPosition() for agent in invaders]
       self.target = min(positions, key = lambda x: self.getMazeDistance(mypos, x))
-    # Se nao existir um pacman no campo de percepcao,
-    # mas nossos pacdots estiverem sumindo, va na direcao
-    # dos pacdots desaparecidos
+    # If we can't see an invader, but our pacdots were eaten,
+    # we will check the position where the pacdot disappeared.
     elif self.lastObservedFood != None:
       eaten = set(self.lastObservedFood) - set(self.getFoodYouAreDefending(gameState).asList())
       if len(eaten) > 0:
         self.target = eaten.pop()
 
-    # Atualiza lista de pacdots na memoria do agente
+    # Update the agent memory about our pacdots.
     self.lastObservedFood = self.getFoodYouAreDefending(gameState).asList()
 
-    # Nenhum inimigo a vista, nossos pacdots nao estao sumindo, e
-    # temos poucos pacdots. Selecione um pac-dot aleatorio para proteger.
+    # No enemy in sight, and our pacdots are not disappearing.
+    # If we have only a few pacdots, let's walk among them.
     if self.target == None and len(self.getFoodYouAreDefending(gameState).asList()) <= 4:
       food = self.getFoodYouAreDefending(gameState).asList() \
            + self.getCapsulesYouAreDefending(gameState)
       self.target = random.choice(food)
-    # Nenhum inimigo a vista, nossos pacdots nao estao sumindo, e
-    # temos muitos pacdots. Patrulhe o meio do mapa.
+    # If we have many pacdots, let's patrol the map central area.
     elif self.target == None:
       self.target = self.selectPatrolTarget()
 
-    # Expande os estados sucessores.
-    # Funcao de avaliacao com base na distancia ao target.
+    # Choose action. We will take the action that brings us
+    # closer to the target. However, we will never stay put
+    # and we will never invade the enemy side.
     actions = gameState.getLegalActions(self.index)
     goodActions = []
     fvalues = []
@@ -323,7 +333,9 @@ class Defender(CaptureAgent):
         goodActions.append(a)
         fvalues.append(self.getMazeDistance(newpos, self.target))
 
-    # Seleciona aleatoriamente entre os estados empatados.
+    # Randomly chooses between ties.
     best = min(fvalues)
     ties = filter(lambda x: x[0] == best, zip(fvalues, goodActions))
+
+    #print 'eval time for defender agent %d: %.4f' % (self.index, time.time() - start)
     return random.choice(ties)[1]
