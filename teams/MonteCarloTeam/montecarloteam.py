@@ -209,16 +209,73 @@ class Defender(CaptureAgent):
     CaptureAgent.__init__(self, index)
     self.target = None
     self.lastObservedFood = None
+    self.patrolDict = {}
+
+  def distFoodToPatrol(self, gameState):
+    food = self.getFoodYouAreDefending(gameState).asList()
+    total = 0
+    #for position in self.noWallSpots:
+    #  dist = 0
+    #  for foodPos in food:
+    #    dist += self.getMazeDistance(position, foodPos)
+    #  self.patrolDict[position] = dist
+    #  total += dist
+    for position in self.noWallSpots:
+      closestFoodDist = "+inf"
+      for foodPos in food:
+        dist = self.getMazeDistance(position, foodPos)
+        if dist < closestFoodDist:
+          closestFoodDist = dist
+      self.patrolDict[position] = 1.0/float(closestFoodDist)
+      total += self.patrolDict[position]
+
+    print self.patrolDict
+    for x in self.patrolDict.keys():
+      self.patrolDict[x] = float(self.patrolDict[x])/float(total)
+    print self.patrolDict
+
+  def selectPatrolTarget(self):
+    rand = random.random()
+    sum = 0.0
+    for x in self.patrolDict.keys():
+      sum += self.patrolDict[x]
+      if rand < sum:
+        return x
 
   # Implemente este metodo para pre-processamento (15s max).
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
 
+    # Compute central positions without walls from map layout.
+    # The defender will walk among these positions to defend
+    # its territory.
+    if self.red:
+      centralX = (gameState.data.layout.width - 2)/2
+    else:
+      centralX = ((gameState.data.layout.width - 2)/2) + 1
+    self.noWallSpots = []
+    for i in range(1, gameState.data.layout.height - 1):
+      if not gameState.hasWall(centralX, i):
+        self.noWallSpots.append((centralX, i))
+
+    # Remove some positions. The agent do not need to patrol
+    # all positions in the central area.
+    print len(self.noWallSpots)
+    while len(self.noWallSpots) > (gameState.data.layout.height -2)/2:
+      self.noWallSpots.pop(0)
+      self.noWallSpots.pop(len(self.noWallSpots)-1)
+    print len(self.noWallSpots)
+
+    self.distFoodToPatrol(gameState)
+
+
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
 
-    alpha = 1 # siga o adversario.
+    if self.lastObservedFood and len(self.lastObservedFood) != len(self.getFoodYouAreDefending(gameState).asList()):
+      self.distFoodToPatrol(gameState)
+
     mypos = gameState.getAgentPosition(self.index)
    
     if mypos == self.target:
@@ -227,14 +284,11 @@ class Defender(CaptureAgent):
     # Se existir algum Pac-Man no campo de percepcao,
     # defina target como a posicao do invasor mais proximo.
     x = self.getOpponents(gameState)
-
     enemies  = [gameState.getAgentState(i) for i in self.getOpponents(gameState)]
     invaders = filter(lambda x: x.isPacman and x.getPosition() != None, enemies)
     if len(invaders) > 0:
       positions = [agent.getPosition() for agent in invaders]
       self.target = min(positions, key = lambda x: self.getMazeDistance(mypos, x))
-      if gameState.getAgentState(self.index).scaredTimer > 0:
-        alpha = -1 # fuja do adversario.
     # Se nao existir um pacman no campo de percepcao,
     # mas nossos pacdots estiverem sumindo, va na direcao
     # dos pacdots desaparecidos
@@ -243,24 +297,33 @@ class Defender(CaptureAgent):
       if len(eaten) > 0:
         self.target = eaten.pop()
 
+    # Atualiza lista de pacdots na memoria do agente
     self.lastObservedFood = self.getFoodYouAreDefending(gameState).asList()
 
-    # Nenhum inimigo a vista, selecione um pac-dot aleatorio para proteger.
-    if self.target == None:
+    # Nenhum inimigo a vista, nossos pacdots nao estao sumindo, e
+    # temos poucos pacdots. Selecione um pac-dot aleatorio para proteger.
+    if self.target == None and len(self.getFoodYouAreDefending(gameState).asList()) <= 4:
       food = self.getFoodYouAreDefending(gameState).asList() \
            + self.getCapsulesYouAreDefending(gameState)
       self.target = random.choice(food)
+    # Nenhum inimigo a vista, nossos pacdots nao estao sumindo, e
+    # temos muitos pacdots. Patrulhe o meio do mapa.
+    elif self.target == None:
+      self.target = self.selectPatrolTarget()
 
     # Expande os estados sucessores.
     # Funcao de avaliacao com base na distancia ao target.
     actions = gameState.getLegalActions(self.index)
+    goodActions = []
     fvalues = []
     for a in actions:
       new_state = gameState.generateSuccessor(self.index, a)
-      newpos = new_state.getAgentPosition(self.index)
-      fvalues.append(alpha * self.getMazeDistance(newpos, self.target))
+      if not new_state.getAgentState(self.index).isPacman and not a == Directions.STOP:
+        newpos = new_state.getAgentPosition(self.index)
+        goodActions.append(a)
+        fvalues.append(self.getMazeDistance(newpos, self.target))
 
     # Seleciona aleatoriamente entre os estados empatados.
     best = min(fvalues)
-    ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
+    ties = filter(lambda x: x[0] == best, zip(fvalues, goodActions))
     return random.choice(ties)[1]
