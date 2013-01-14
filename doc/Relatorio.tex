@@ -1,0 +1,119 @@
+\documentclass[a4paper,12pt]{article}
+
+\renewcommand{\baselinestretch}{1.0}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{verbatim}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage[lined,algonl,ruled]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{enumerate}
+\usepackage[hmargin=3cm,vmargin=3cm]{geometry}
+
+\lstset{stringstyle=\ttfamily,
+language=C,
+frame=single,
+showstringspaces=false,
+breaklines=true,
+basicstyle=\footnotesize,
+firstnumber=1,
+numbers=left,
+stepnumber=5,
+numberstyle=\tiny,
+xrightmargin=0pt,
+xleftmargin=0pt}
+
+\begin{document}
+
+%\begin{titlepage}
+%\begin{figure}[htb!]
+%\begin{minipage}[c]{0.12\linewidth}
+%\includegraphics[scale=0.85]{dcc.png}
+%\end{minipage}
+%\begin{minipage}[c]{0.8\linewidth}
+%\begin{center}
+%      {\large Universidade Federal de Minas Gerais - UFMG} \\
+%      {\large Instituto de Ciências Exatas - ICEX} \\
+%      {\large Departamento de Ciência da Computação - DCC}\\
+%\end{center}
+%\end{minipage}
+%\end{figure}
+
+
+%\begin{center}
+%\vspace{5cm}
+%{\Huge Projeto e Análise de Algoritmos\\}
+%\vspace{0,8cm}
+%{\LARGE \it Trabalho Prático 1 - Doors and Penguins\\}
+%\vspace{0,8cm}
+%\vspace{6cm}
+%       {\tt \large Thiago Silva Vilela}
+%\end{center}
+%\end{titlepage}
+
+%\newpage
+
+%\newpage
+%\tableofcontents
+
+\newpage
+\begin{center}
+ {\LARGE  Trabalho Prático 2: Competição Pac-Man\\}
+ {\Large \it Inteligência Artificial\\}
+ {\Large Thiago Silva Vilela\\}
+\end{center}
+\vspace{1cm}
+
+\section{Introdução}
+
+O trabalho prático consiste em desenvolver agentes inteligentes para uma variação
+competitiva do jogo Pac-Man. Nesse jogo, controlamos dois agentes em um labirinto
+com dois territórios. Os dois agentes devem colaborar para defender seu território
+e atacar o território dos adversários, pegando o maior número possível de
+\textit{pacdots} do inimigo.
+
+\section{Classificação do problema}
+De acordo com o livro texto, o problema pode ser classificado da seguinte forma:
+
+\begin{itemize}
+  \item \textbf{Parcialmente observável}, uma vez que o agente não possui conhecimento
+  do estado completo do ambiente. Mais especificamente, o agente não conhece a posição
+  de seus inimigos, a não ser que eles estejam suficientemente próximos.
+  \item \textbf{Multi-agente}, uma vez que certo agente competirá com dois inimigos
+  por uma maior pontuação, e contará com um aliado para ajudá-lo a maximizar sua
+  pontuação. O ambiente é multi-agente competitivo e multi-agente cooperativo.
+  \item \textbf{Determinístico}, uma vez que o próximo estado do ambiente pode ser
+  previsto através do estado atual e da ação escolhida pelo agente. Vale lembrar que,
+  na definição de ambientes determiníticos usada pelo livro texto, ignoramos as
+  incertezas que aparecem somente pelas ações dos outros agentes. O ambiente poderia
+  ser considerado estocástico caso levamos essas incertezas em consideração.
+  \item \textbf{Sequencial}, uma vez que a escolha de certa ação em um dado momento
+  afeta todas as decisões futuras.
+  \item \textbf{Semi-dinâmico}, uma vez que o agente tem um tempo fixo ($1$ segundo)
+  para tomar uma decisão e, durante esse tempo, o ambiente não se altera. Dessa forma,
+  o agente sabe que o ambiente não muda enquanto ele está deliberando, mas precisa se
+  preocupar com a passagem do tempo.
+  \item \textbf{Discreto}, uma vez que o ambiente é discreto e existe um número
+  finito de estados e ações distintas no problema.
+\end{itemize}
+
+\section{Modelagem dos agentes}
+\subsection{Agente Ofensivo}
+\subsection{Agente Defensivo}
+
+\section{Análise de complexidade}
+\subsection{Agente Ofensivo}
+\subsection{Agente Defensivo}
+
+\section{Análise de desempenho e discussão dos resultados}
+
+%\begin{center}
+%\includegraphics[scale=0.4]{best_algo.png}
+%\end{center}
+
+\end{document}
