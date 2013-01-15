@@ -142,9 +142,7 @@ a ação \textbf{STOP}) ou de reverter sua direção (tomar a ação de sentido 
 corrente). Note que o agente pode realizar essas ações durante o jogo. O que é proibido é seu
 uso durante as simulações aleatórias.
 
-
-
-Por fim, será explicada a função de avaliação utilizada. A função de avaliação foi
+A função de avaliação usada foi
 baseada naquela presente no \textit{BaselineAgents}. Ela consiste na
 combinação linear de \textit{features} e de pesos associados às \textit{features}.
 As \textit{features} consideradas são as seguintes:
@@ -177,6 +175,13 @@ inimigo, um peso negativo é dado à distintância ao \textit{pacdot} mais próx
 melhor) e um peso nulo é dado à \textit{feature} \textbf{Pacman}. Caso o oponente esteja no
 estado \textit{scared}, o peso dado à distância ao inimigo é zerado. Caso nosso agente fique preso
 no campo de defesa, a \textit{feature} \textbf{Pacman} ganha um peso alto.
+
+Por fim, uma última característica foi adicionada ao agente ofensivo: a capacidade de evitar
+alguns becos sem \textit{pacdots}. Antes de avaliar as ações possíveis, é realizado um
+pré-processamento na ação. Ela é expandida até uma profundidade $5$ e, caso todos os caminhos
+expandidos a partir dessa ação terminarem em um beco sem \textit{pacdots}, então o agente descarta a
+ação. Essa característica é particularmente importante no fim do jogo, quando existem poucos
+\textit{pacdots} restantes e entrar em um beco pode ser bastante ruim, encurralando o agente.
 
 \subsection{Agente Defensivo}
 
