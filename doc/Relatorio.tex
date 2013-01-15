@@ -109,7 +109,74 @@ e comer \textit{pacdots}, enquanto o segundo foi feito para defender seus própr
 \textit{pacdots}.
 
 \subsection{Agente Ofensivo}
+O agente ofensivo utiliza simulações de Monte Carlo para avaliar cada ação possível em
+determinado momento. A ação escolhida para execução é aquela que foi mais bem avaliada.
 
+Normalmente, durante uma simulação, o jogo é jogado aleatoriamente por todos os agentes
+até que ele termine, e o resultado obtido será, por exemplo, o número total de vitórias obtidas
+após a execução de várias simulações. No nosso Pac-Man competitivo, no entanto, essa
+abordagem não é viável: o número de ações tomadas até o fim do jogo pode ser muito alto e
+não temos visibilidade constante do nosso oponente para simular suas ações. A solução para
+o primeiro desses problemas é bastante utilizada em aplicações de tempo real, e consiste
+em realizar as simulações somente até uma certa profundidade $p$, ou seja, serão simuladas
+somente $p$ ações de cada agente. Após essa simulação parcial, é necessário utilizar uma
+função de avaliação no último estado obtido. A solução adotada para o segundo problema
+foi fixar as ações de todos os outros agentes como \textbf{STOP}. Dessa forma, na prática,
+será necessário simular somente as ações de um único agente (aquele que está decidindo que ação tomar).
+Essa solução, apesar de bastante simples, mostra resultados promissores se combinada a
+uma boa função de avaliação.
+
+Dois parâmetros importantes utilizados na simulação de Monte Carlo implementada são a profundidade
+da simulação a ser utilizada e o número de simulações usadas para avaliar certo estado.
+Quanto maior o valor desses parâmetros, melhores serão os resultados obtidos. A vantagem
+desse algoritmo é que tais parâmetros podem ser ajustados para que cada tomada de decisão
+do agente utilize o máximo de tempo disponível, melhorando assim o resultado.
+
+A simulação aleatória realizada pelo agente precisa de alguns cuidados para que seja
+mais eficiente. Não é interessante que o agente escolha sempre aleatoriamente entre todas
+as ações possíveis a cada passo da simulação. Isso pode levar o agente a ficar indo e voltando,
+ou até mesmo ficar parado em alguns momentos. Obviamente, na maioria das vezes, não é interessante
+que o agente fique parado ou indo e voltando entre as duas mesmas posições durante uma simulação.
+Dessa forma, na execução da simulação aleatória, o agente é proibido de ficar parado (executar
+a ação \textbf{STOP}) ou de reverter sua direção (tomar a ação de sentido contrário à direção
+corrente). Note que o agente pode realizar essas ações durante o jogo. O que é proibido é seu
+uso durante as simulações aleatórias.
+
+
+
+Por fim, será explicada a função de avaliação utilizada. A função de avaliação foi
+baseada naquela presente no \textit{BaselineAgents}. Ela consiste na
+combinação linear de \textit{features} e de pesos associados às \textit{features}.
+As \textit{features} consideradas são as seguintes:
+
+\begin{itemize}
+  \item \textbf{\textit{Score} do estado}: pega o \textit{score} do
+  estado final da simulação. O objetivo dessa \textit{feature} é maximizar a pontuação
+  obtida pelo agente.
+  \item \textbf{Distância ao \textit{pacdot} mais próximo}: a distância do agente ao \textit{pacdot}
+  mais próximo no estado final da simulação. O objetivo dessa \textit{feature} é,
+  também, maximizar a possível pontuação obtida. Caso, durante as simulações, hajam
+  dois estados finais com mesma pontuação, aquele onde o agente se encontra
+  mais próximo de outro \textit{pacdot} é mais bem avaliado.
+  \item \textbf{Distância ao inimigo mais próximo}: a distância do agente ao inimigo
+  mais próximo ao final da simulação. Essa \textit{feature} permite ao agente fugir
+  do inimigo caso esteja sendo perseguido, ao mesmo tempo em que tenta comer mais
+  \textit{pacdots}.
+  \item \textbf{Pacman}: essa feature indica se o agente é um fantasma ou um
+  pacman. Ela é utilizada somente em uma situação bastante específica, onde pode
+  acontecer de o agente voltar ao campo de defesa para se defender e não conseguir
+  mais voltar ao ataque pois o inimigo defensor fica na borda vigiando o agente (o
+  agente acaba achando vantajoso ficar vivo em seu território).
+  Nesse caso, o agente passa a priorizar o fato de ser pacman, e para de se defender
+  na forma de fantasma, priorizando o ataque.
+\end{itemize}
+
+Os pesos das \textit{features} são utilizados de forma dinâmica: normalmente, o maior peso
+vai para a \textit{feature} referente ao \textit{score}, um peso menor é dado à distância ao
+inimigo, um peso negativo é dado à distintância ao \textit{pacdot} mais próximo (quanto mais perto,
+melhor) e um peso nulo é dado à \textit{feature} \textbf{Pacman}. Caso o oponente esteja no
+estado \textit{scared}, o peso dado à distância ao inimigo é zerado. Caso nosso agente fique preso
+no campo de defesa, a \textit{feature} \textbf{Pacman} ganha um peso alto.
 
 \subsection{Agente Defensivo}
 

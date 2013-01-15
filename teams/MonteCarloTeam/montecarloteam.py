@@ -94,9 +94,6 @@ class Attacker(EvaluationBasedAgent):
       if closestDist <= 5:
         features['distanceToGhost'] = closestDist
 
-    # Compute walked distance
-    features['walkedDist'] = self.getMazeDistance(myPos, self.lastPosition)
-
     # Compute if is pacman
     features['isPacman'] = 1 if successor.getAgentState(self.index).isPacman else 0
 
@@ -108,7 +105,7 @@ class Attacker(EvaluationBasedAgent):
     """
     # If tha agent is locked, we will make him try and atack
     if self.inactiveTime > 80:
-      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'walkedDist': 1, 'isPacman': 1000}
+      return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 1000}
 
     # If opponent is scared, the agent should not care about distanceToGhost
     successor = self.getSuccessor(gameState, action)
@@ -122,10 +119,10 @@ class Attacker(EvaluationBasedAgent):
       closest_enemies = filter(lambda x: x[0] == closestPos, zip(positions, inRange))
       for agent in closest_enemies:
         if agent[1].scaredTimer > 0:
-          return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'walkedDist': 1, 'isPacman': 0}
+          return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 0, 'isPacman': 0}
 
     # Weights normally used
-    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'walkedDist': 1, 'isPacman': 0}
+    return {'successorScore': 200, 'distanceToFood': -5, 'distanceToGhost': 2, 'isPacman': 0}
 
   def randomSimulation(self, depth, gameState):
     """
@@ -152,6 +149,26 @@ class Attacker(EvaluationBasedAgent):
     # Evaluate the final simulation state
     return self.evaluate(new_state, Directions.STOP)
 
+  def takeToEmptyAlley(self, gameState, action, depth):
+    if depth == 0:
+      return False
+    old_score = self.getScore(gameState)
+    new_state = gameState.generateSuccessor(self.index, action)
+    new_score = self.getScore(new_state)
+    if old_score < new_score:
+      return False
+    actions   = new_state.getLegalActions(self.index)
+    actions.remove(Directions.STOP)
+    reversed_direction = Directions.REVERSE[new_state.getAgentState(self.index).configuration.direction]
+    if reversed_direction in actions:
+      actions.remove(reversed_direction)
+    if len(actions) == 0:
+      return True
+    for a in actions:
+      if not self.takeToEmptyAlley(new_state, a, depth - 1):
+        return False
+    return True
+
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
     # Variables used to verify if the agent os locked
@@ -166,10 +183,7 @@ class Attacker(EvaluationBasedAgent):
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
     # You can profile your evaluation time by uncommenting these lines
-    #start = time.time()
-
-    # Stores the agent position. This value will be used in the state evaluation.
-    self.lastPosition = gameState.getAgentState(self.index).getPosition()
+    start = time.time()
 
     # Updates inactiveTime. This variable indicates if the agent is locked.
     currentEnemyFood = len(self.getFood(gameState).asList())
@@ -184,8 +198,20 @@ class Attacker(EvaluationBasedAgent):
 
     # Get valid actions. Staying put is almost never a good choice, so
     # the agent will ignore this action.
-    actions = gameState.getLegalActions(self.index)
-    actions.remove(Directions.STOP)
+    all_actions = gameState.getLegalActions(self.index)
+    all_actions.remove(Directions.STOP)
+    actions = []
+    for a in all_actions:
+      if not self.takeToEmptyAlley(gameState, a, 5):
+        actions.append(a)
+    if len(actions) == 0:
+      actions = all_actions
+
+    #discarded = set(all_actions) - set(actions)
+    #if len(discarded) != 0:
+      #print discarded
+      #util.pause()
+
 
     fvalues = []
     for a in actions:
@@ -199,7 +225,7 @@ class Attacker(EvaluationBasedAgent):
     ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
     toPlay = random.choice(ties)[1]
 
-    #print 'eval time for offensive agent %d: %.4f' % (self.index, time.time() - start)
+    print 'eval time for offensive agent %d: %.4f' % (self.index, time.time() - start)
     return toPlay
  
 class Defender(CaptureAgent):
