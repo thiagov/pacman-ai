@@ -184,15 +184,53 @@ ação. Essa característica é particularmente importante no fim do jogo, quand
 \textit{pacdots} restantes e entrar em um beco pode ser bastante ruim, encurralando o agente.
 
 \subsection{Agente Defensivo}
+O agente defensivo é bastante simples. Ele toma ações com base em uma máquina de estados,
+mostrada na figura a seguir:
+
+%\begin{center}
+%\includegraphics[scale=0.4]{best_algo.png}
+%\end{center}
+
+Segue uma breve explicação de cada estado:
+
+\begin{itemize}
+  \item \textbf{Patrulha pontos centrais}: essa é a ação executada pelo agente defensivo
+  na maior parte do tempo. Ela consiste em escolher um ponto na borda dos territórios
+  dos dois times e se deslocar para tal ponto. Chamamos esses pontos de pontos de patrulha.
+  Os pontos de patrulha para os quais o agente poderá se deslocar são encontrados durante o
+  tempo de pré-processamento. Para a escolha do ponto a ser visitado, calculamos algumas
+  probabilidades. Associamos, a cada ponto de patrulha, uma probabilidade que corresponde
+  à chande do agente escolher ir para tal posição. A probabilidade é calculada com base
+  no inverso da distância do \textit{pacdot} mais próximo à posição do ponto de patrulha
+  em questão. Esses valores são normalizados de forma que a soma das probabilidades seja $1$.
+  Dessa forma, o agente defenser tem mais chance de se deslocar para pontos de patrulha
+  com um \textit{pacdot} próximo, uma vez que o oponente provavelmente tentará pegar
+  esses \textit{pacdots} primeiro.
+
+  \item \textbf{Verifica posição onde comida sumiu}: o agente implementado verifica,
+  a cada iteração do jogo, se algum \textit{pacdot} do seu território desapareceu,
+  uma vez que temos informações das posições de todos os nossos \textit{pacdots}.
+  Caso algum tenha desaparecido, o agente irá se mover para a posição
+  do \textit{pacdot} que desapareceu. Dessa forma espera-se que, caso o inimigo passe
+  pela patrulha do agente defensor, seja possível identificar rapidamente que
+  nosso território foi invadido, assim como estimar a posição do atacante.
+
+  \item \textbf{Persegue oponente}: durante a patrulha e verificação previamente
+  descritas, caso o agente veja um inimigo, ele passa a persegui-lo.
+
+  \item \textbf{Anda aleatoriamente entre os \textit{pacdots} restantes}: ao fim do jogo,
+  quando o número de \textit{pacdots} a ser defendido é pequeno, é mais vatajoso
+  que o defensor se desloque entre esses \textit{pacdots} ao invés de patrulhar a área
+  central do mapa. Dessa forma, quando temos $4$ ou menos \textit{pacdots}, o agente passa
+  a andar aleatoriamente de um para outro.
+\end{itemize}
+
+
 
 \section{Análise de complexidade}
 \subsection{Agente Ofensivo}
 \subsection{Agente Defensivo}
 
 \section{Análise de desempenho e discussão dos resultados}
-
-%\begin{center}
-%\includegraphics[scale=0.4]{best_algo.png}
-%\end{center}
 
 \end{document}
