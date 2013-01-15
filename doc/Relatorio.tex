@@ -171,7 +171,7 @@ As \textit{features} consideradas são as seguintes:
 
 Os pesos das \textit{features} são utilizados de forma dinâmica: normalmente, o maior peso
 vai para a \textit{feature} referente ao \textit{score}, um peso menor é dado à distância ao
-inimigo, um peso negativo é dado à distintância ao \textit{pacdot} mais próximo (quanto mais perto,
+inimigo, um peso negativo é dado à distância ao \textit{pacdot} mais próximo (quanto mais perto,
 melhor) e um peso nulo é dado à \textit{feature} \textbf{Pacman}. Caso o oponente esteja no
 estado \textit{scared}, o peso dado à distância ao inimigo é zerado. Caso nosso agente fique preso
 no campo de defesa, a \textit{feature} \textbf{Pacman} ganha um peso alto.
@@ -205,7 +205,8 @@ Segue uma breve explicação de cada estado:
   em questão. Esses valores são normalizados de forma que a soma das probabilidades seja $1$.
   Dessa forma, o agente defenser tem mais chance de se deslocar para pontos de patrulha
   com um \textit{pacdot} próximo, uma vez que o oponente provavelmente tentará pegar
-  esses \textit{pacdots} primeiro.
+  esses \textit{pacdots} primeiro. Sempre que o oponente come um \textit{pacdot}, as probabilidades
+  são recalculadas.
 
   \item \textbf{Verifica posição onde comida sumiu}: o agente implementado verifica,
   a cada iteração do jogo, se algum \textit{pacdot} do seu território desapareceu,
@@ -226,10 +227,33 @@ Segue uma breve explicação de cada estado:
 \end{itemize}
 
 
-
 \section{Análise de complexidade}
+Nessa sessão será analisada a complexidade dos dois agentes implementados.
+
 \subsection{Agente Ofensivo}
+Em termos de tempo, a operação mais custosa do agente ofensivo é avaliar as possíveis ações
+que serão tomadas usando simulações de Monte Carlo. Seja $a$ o número de ações
+que o agente pode escolher. Para cada ação, serão realizadas $n$ simulações
+aleatórias de profundidade $d$. A avaliação de um estado ao fim da simulação
+é bastante simples, e o maior custo dessa operação é encontrar o \textit{pacdot}
+com menor distância à posição atual do agente. Considerando que exitem $p$
+\textit{pacdots} no campo do adversário, essa avaliação é da ordem de $O(p)$,
+considerando que o método \textit{getMazeDistance()} fornecido possua custo
+constante. Dessa forma, o custo de tomar uma decisão é da ordem de $O(adnp)$.
+No entanto, $a$ é um número fixo (o agente pode escolher, no pior caso, entre $5$ ações), e
+$d$ e $n$ também são fixados antes da execução. Sendo $c = 5 * d * n$, uma constante,
+a complexidade temporal será da ordem de $O(cp)$, ou $O(p)$.
+
+
 \subsection{Agente Defensivo}
+Como pode ser observado na descrição do agente defensivo, a maioria das suas
+operações consiste em definir \textit{targets}. Tais operações são bastante
+simples e possuem, no geral, custo constante em termos de tempo. A operação mais custosa do defensor
+é calcular e recalcular as probabilidades de visitar os pontos de patrulha. Para calcular tal
+probabilidade é necessário encontrar, para cada ponto de patrulha, o \textit{pacdot} mais próximo.
+Sendo $x$ o número de pontos de patrulha (que varia dependendo do tamanho do mapa ou do número
+de paredes na área de encontro entre os dois territórios) e $p$ o número de \textit{pacdots}
+no nosso território, a complexidade temporal do agente defensivo é, no pior caso, $O(xp)$.
 
 \section{Análise de desempenho e discussão dos resultados}
 
