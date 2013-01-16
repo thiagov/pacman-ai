@@ -265,6 +265,13 @@ no território azul. Isso foi feito para avaliaro efeito do território no agent
 Os mapas foram gerados aleatoriamente para cada jogo, e o território de cada time
 possuia sempre $30$ \textit{pacdots}, ou seja, a pontuação máxima é $28$ pontos.
 
+As simulações de Monte Carlo utilizadas pelo agente ofensivo do \textit{MeuTime} utilizaram
+profundidade $6$, e foram feitas $30$ simulações para avaliar cada ação. Essa escolha de números
+deixa o tempo de decisão do agente bastante baixo (cerca de $0,2$ segundos, um tempo bem abaixo
+do limite permitido), oferecendo ainda um bom resultado. Aumentando esses parâmetros é
+possível melhorar o desempenho do agente, mas eles foram mantidos relativamente baixos
+para agilizar a execução dos diversos testes.
+
 As duas tabelas abaixo mostram os resultados obtidos nos jogos contra o \textit{SimpleTeam}.
 As tabelas mostram o número de vitórias, derrotas e o \textit{score} médio para o time vermelho,
 assim como o número de jogos empatados.
@@ -332,6 +339,8 @@ Contra o \textit{RandomTeam}, o \textit{MeuTime} venceu $100\%$ das vezes. Além
 ele venceu sempre com o \textit{score} máximo. Esse resultado não é tão surpreendente,
 uma vez que que o \textit{RandomTeam} possui um desempenho bastante ruim.
 
+A próxima tabela mostra os resultados obtidos pelo \textit{MeuTime} jogando contra
+ele mesmo.
 
 \begin{table}[htb!]
     {\centering
@@ -345,6 +354,14 @@ uma vez que que o \textit{RandomTeam} possui um desempenho bastante ruim.
     }
 \end{table}
 
+Pode-se perceber que, nesse caso, os jogos foram bastante equilibrados. Cada time ganhou quase o mesmo
+número de vezes. Além disso, o \textit{score} médio ficou próximo de $1$, ou seja, as vitórias foram
+por poucos pontos, o que indica que os jogos foram equilibrados. Esses resultados mostram, novamente,
+que o time implementado independe do território alocado.
 
+Podemos concluir que o time desenvolvido apresentou um bom desempenho. Contra agentes muito simples,
+como o \textit{RandomTeam}, ele domina o jogo por completo. Com agentes um pouco mais complexos,
+mas ainda bastante simples, como o \textit{SimpleTeam}, os resultados obtidos são ainda bastante
+satisfatórios, com uma alta taxa de vitórias e um \textit{score} médio consideravelmente alto.
 
 \end{document}

@@ -264,6 +264,9 @@ class Defender(CaptureAgent):
         dist = self.getMazeDistance(position, foodPos)
         if dist < closestFoodDist:
           closestFoodDist = dist
+      # We can't divide by 0!
+      if closestFoodDist == 0:
+        closestFoodDist = 1
       self.patrolDict[position] = 1.0/float(closestFoodDist)
       total += self.patrolDict[position]
     # Normalize the value used as probability.
