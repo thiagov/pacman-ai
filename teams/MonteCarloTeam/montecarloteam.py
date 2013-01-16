@@ -218,7 +218,7 @@ class Attacker(EvaluationBasedAgent):
       new_state = gameState.generateSuccessor(self.index, a)
       value = 0
       for i in range(1,31):
-        value += self.randomSimulation(6, new_state)
+        value += self.randomSimulation(10, new_state)
       fvalues.append(value)
 
     best = max(fvalues)
