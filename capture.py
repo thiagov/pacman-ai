@@ -362,8 +362,10 @@ class CaptureRules:
       if not game.rules.quiet:
         if state.getRedFood().count() == MIN_FOOD:
           print 'The Blue team has captured all but %d of the opponents\' dots.' % MIN_FOOD
+          print 'The Blue team wins by %d points.' % state.data.score
         if state.getBlueFood().count() == MIN_FOOD:
           print 'The Red team has captured all but %d of the opponents\' dots.' % MIN_FOOD
+          print ' The Red team wins by %d points.' % state.data.score
         if state.getBlueFood().count() > MIN_FOOD and state.getRedFood().count() > MIN_FOOD:
           print 'Time is up.'
           if state.data.score == 0: print 'Tie game!'

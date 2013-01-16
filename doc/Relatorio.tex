@@ -257,4 +257,94 @@ no nosso território, a complexidade temporal do agente defensivo é, no pior ca
 
 \section{Análise de desempenho e discussão dos resultados}
 
+O time de agentes desenvolvido, batizado de \textit{MeuTime}, foi testado contra os dois
+times fornecidos: o \textit{SimpleTeam} e o \textit{RandomTeam}. Além disso, foram
+realizados testes do \textit{MeuTime} contra ele mesmo. Para cada oponente, foram realizados
+$20$ jogos com o \textit{MeuTime} no território vermelho e $20$ jogos com o \textit{MeuTime}
+no território azul. Isso foi feito para avaliaro efeito do território no agente implementado.
+Os mapas foram gerados aleatoriamente para cada jogo, e o território de cada time
+possuia sempre $30$ \textit{pacdots}, ou seja, a pontuação máxima é $28$ pontos.
+
+As duas tabelas abaixo mostram os resultados obtidos nos jogos contra o \textit{SimpleTeam}.
+As tabelas mostram o número de vitórias, derrotas e o \textit{score} médio para o time vermelho,
+assim como o número de jogos empatados.
+
+\begin{table}[htb!]
+    {\centering
+    \begin{tabular}{|c|c|} \hline
+    Vitórias     & 18   \\ \hline
+    Derrotas     & 2    \\ \hline
+    Empates      & 0    \\ \hline
+    Score médio  & 8.55 \\ \hline
+    \end{tabular}
+    \caption{\textit{MeuTime} (vermelho) x \textit{SimpleTeam} (azul)}
+    }
+\end{table}
+
+\begin{table}[htb!]
+    {\centering
+    \begin{tabular}{|c|c|} \hline
+    Vitórias     & 3    \\ \hline
+    Derrotas     & 17   \\ \hline
+    Empates      & 0    \\ \hline
+    Score médio  & -6.2 \\ \hline
+    \end{tabular}
+    \caption{\textit{SimpleTeam} (vermelho) x \textit{MeuTime} (azul)}
+    }
+\end{table}
+
+Inicialmente é possível perceber que, como esperado, o time implementado independe do
+território. Os resultados são bastante parecidos para os territórios azul e vermelho.
+
+O \textit{MeuTime} mostrou um desempenho bastante satisfatório contra o \textit{SimpleTeam},
+ganhando aproximadamente $90\%$ dos jogos realizados com um \textit{score} de, em média,
+$7$ pontos.
+
+As tabelas a seguir mostram os resultados obtidos nos jogos contra o \textit{RandomTeam}.
+Novamente, as tabelas mostram o número de vitórias, derrotas e o \textit{score} médio
+para o time vermelho.
+
+\begin{table}[htb!]
+    {\centering
+    \begin{tabular}{|c|c|} \hline
+    Vitórias     & 20 \\ \hline
+    Derrotas     & 0  \\ \hline
+    Empates      & 0  \\ \hline
+    Score médio  & 28 \\ \hline
+    \end{tabular}
+    \caption{\textit{MeuTime} (vermelho) x \textit{RandomTeam} (azul)}
+    }
+\end{table}
+
+\begin{table}[htb!]
+    {\centering
+    \begin{tabular}{|c|c|} \hline
+    Vitórias     & 0   \\ \hline
+    Derrotas     & 20  \\ \hline
+    Empates      & 0   \\ \hline
+    Score médio  & -28 \\ \hline
+    \end{tabular}
+    \caption{\textit{RandomTeam} (vermelho) x \textit{MeuTime} (azul)}
+    }
+\end{table}
+
+Contra o \textit{RandomTeam}, o \textit{MeuTime} venceu $100\%$ das vezes. Além disso,
+ele venceu sempre com o \textit{score} máximo. Esse resultado não é tão surpreendente,
+uma vez que que o \textit{RandomTeam} possui um desempenho bastante ruim.
+
+
+\begin{table}[htb!]
+    {\centering
+    \begin{tabular}{|c|c|} \hline
+    Vitórias     & 11  \\ \hline
+    Derrotas     & 9   \\ \hline
+    Empates      & 0   \\ \hline
+    Score médio  & 1.5 \\ \hline
+    \end{tabular}
+    \caption{\textit{MeuTime} (vermelho) x \textit{MeuTime} (azul)}
+    }
+\end{table}
+
+
+
 \end{document}

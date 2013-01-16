@@ -183,7 +183,7 @@ class Attacker(EvaluationBasedAgent):
   # Implemente este metodo para controlar o agente (1s max).
   def chooseAction(self, gameState):
     # You can profile your evaluation time by uncommenting these lines
-    start = time.time()
+    # start = time.time()
 
     # Updates inactiveTime. This variable indicates if the agent is locked.
     currentEnemyFood = len(self.getFood(gameState).asList())
@@ -225,7 +225,7 @@ class Attacker(EvaluationBasedAgent):
     ties = filter(lambda x: x[0] == best, zip(fvalues, actions))
     toPlay = random.choice(ties)[1]
 
-    print 'eval time for offensive agent %d: %.4f' % (self.index, time.time() - start)
+    #print 'eval time for offensive agent %d: %.4f' % (self.index, time.time() - start)
     return toPlay
  
 class Defender(CaptureAgent):
