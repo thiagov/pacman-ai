@@ -69,7 +69,6 @@ class Attacker(EvaluationBasedAgent):
     """
     Get features used for state evaluation.
     """
-
     features = util.Counter()
     successor = self.getSuccessor(gameState, action)
 
@@ -150,6 +149,10 @@ class Attacker(EvaluationBasedAgent):
     return self.evaluate(new_state, Directions.STOP)
 
   def takeToEmptyAlley(self, gameState, action, depth):
+    """
+    Verify if an action takes the agent to an alley with
+    no pacdots.
+    """
     if depth == 0:
       return False
     old_score = self.getScore(gameState)
@@ -243,13 +246,6 @@ class Defender(CaptureAgent):
     food = self.getFoodYouAreDefending(gameState).asList()
     total = 0
 
-    #for position in self.noWallSpots:
-    #  dist = 0
-    #  for foodPos in food:
-    #    dist += self.getMazeDistance(position, foodPos)
-    #  self.patrolDict[position] = dist
-    #  total += dist
-
     # Get the minimum distance from the food to our
     # patrol points.
     for position in self.noWallSpots:
@@ -284,6 +280,7 @@ class Defender(CaptureAgent):
   def registerInitialState(self, gameState):
     CaptureAgent.registerInitialState(self, gameState)
     self.distancer.getMazeDistances()
+
     # Compute central positions without walls from map layout.
     # The defender will walk among these positions to defend
     # its territory.
