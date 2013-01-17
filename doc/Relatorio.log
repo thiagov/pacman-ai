@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.8.29)  16 JAN 2013 18:28
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2011.8.29)  17 JAN 2013 12:25
 entering extended mode
  %&-line parsing enabled.
 **Relatorio.tex
@@ -532,7 +532,7 @@ File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 Here is how much of TeX's memory you used:
  5722 strings out of 493848
  79324 string characters out of 1152823
- 198956 words of memory out of 3000000
+ 199956 words of memory out of 3000000
  8936 multiletter control sequences out of 15000+50000
  11155 words of font info for 41 fonts, out of 3000000 for 9000
  714 hyphenation exceptions out of 8191
@@ -544,7 +544,7 @@ xmf-texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/
 fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texmf-texlive/fonts/type1/
 public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
 onts/cm/cmti12.pfb>
-Output written on Relatorio.pdf (7 pages, 108587 bytes).
+Output written on Relatorio.pdf (7 pages, 109847 bytes).
 PDF statistics:
  54 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

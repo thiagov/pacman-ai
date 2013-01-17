@@ -91,7 +91,7 @@ De acordo com o livro texto, o problema pode ser classificado da seguinte forma:
   previsto através do estado atual e da ação escolhida pelo agente. Vale lembrar que,
   na definição de ambientes determiníticos usada pelo livro texto, ignoramos as
   incertezas que aparecem somente pelas ações dos outros agentes. O ambiente poderia
-  ser considerado estocástico caso levamos essas incertezas em consideração.
+  ser considerado estocástico caso fossem consideradas essas incertezas.
   \item \textbf{Sequencial}, uma vez que a escolha de certa ação em um dado momento
   afeta todas as decisões futuras.
   \item \textbf{Semi-dinâmico}, uma vez que o agente tem um tempo fixo ($1$ segundo)
@@ -118,8 +118,8 @@ após a execução de várias simulações. No nosso Pac-Man competitivo, no ent
 abordagem não é viável: o número de ações tomadas até o fim do jogo pode ser muito alto e
 não temos visibilidade constante do nosso oponente para simular suas ações. A solução para
 o primeiro desses problemas é bastante utilizada em aplicações de tempo real, e consiste
-em realizar as simulações somente até uma certa profundidade $p$, ou seja, serão simuladas
-somente $p$ ações de cada agente. Após essa simulação parcial, é necessário utilizar uma
+em realizar as simulações somente até uma certa profundidade $d$, ou seja, serão simuladas
+somente $d$ ações de cada agente. Após essa simulação parcial, é necessário utilizar uma
 função de avaliação no último estado obtido. A solução adotada para o segundo problema
 foi fixar as ações de todos os outros agentes como \textbf{STOP}. Dessa forma, na prática,
 será necessário simular somente as ações de um único agente (aquele que está decidindo que ação tomar).
@@ -128,9 +128,9 @@ uma boa função de avaliação.
 
 Dois parâmetros importantes utilizados na simulação de Monte Carlo implementada são a profundidade
 da simulação a ser utilizada e o número de simulações usadas para avaliar certo estado.
-Quanto maior o valor desses parâmetros, melhores serão os resultados obtidos. A vantagem
-desse algoritmo é que tais parâmetros podem ser ajustados para que cada tomada de decisão
-do agente utilize o máximo de tempo disponível, melhorando assim o resultado.
+Geralmente, quanto maior o valor desses parâmetros, melhores serão os resultados obtidos.
+Dessa forma, é importante encontrar valores para esses parâmetros que permitam bons
+resultados e deixem o tempo de execução viável.
 
 A simulação aleatória realizada pelo agente precisa de alguns cuidados para que seja
 mais eficiente. Não é interessante que o agente escolha sempre aleatoriamente entre todas
@@ -184,17 +184,15 @@ ação. Essa característica é particularmente importante no fim do jogo, quand
 \textit{pacdots} restantes e entrar em um beco pode ser bastante ruim, encurralando o agente.
 
 \subsection{Agente Defensivo}
-O agente defensivo é bastante simples. Ele toma ações com base em uma máquina de estados,
-mostrada na figura a seguir:
-
-%\begin{center}
-%\includegraphics[scale=0.4]{best_algo.png}
-%\end{center}
-
-Segue uma breve explicação de cada estado:
+O agente defensivo é bastante simples. Ele funciona definindo posições alvo e se movendo em direção
+a elas, assim como o agente defensor do \textit{SimpleTeam}. A definição do alvo, no entanto,
+é um pouco mais elaborada. O agente define alvos a fim de executar estratégias de alto nível.
+Essas estratégias são: patrulhar pontos centrais do mapa, verificar posição onde \textit{pacdot} sumiu,
+perseguir oponente e vigiar \textit{pacdots}. Segue uma breve explicação de cada estratégia,
+que explica quando ela é escolhida:
 
 \begin{itemize}
-  \item \textbf{Patrulha pontos centrais}: essa é a ação executada pelo agente defensivo
+  \item \textbf{Patrulhar pontos centrais}: essa é a estratégia executada pelo agente defensivo
   na maior parte do tempo. Ela consiste em escolher um ponto na borda dos territórios
   dos dois times e se deslocar para tal ponto. Chamamos esses pontos de pontos de patrulha.
   Os pontos de patrulha para os quais o agente poderá se deslocar são encontrados durante o
@@ -208,7 +206,7 @@ Segue uma breve explicação de cada estado:
   esses \textit{pacdots} primeiro. Sempre que o oponente come um \textit{pacdot}, as probabilidades
   são recalculadas.
 
-  \item \textbf{Verifica posição onde comida sumiu}: o agente implementado verifica,
+  \item \textbf{Verificar posição onde \textit{pacdot} sumiu}: o agente implementado verifica,
   a cada iteração do jogo, se algum \textit{pacdot} do seu território desapareceu,
   uma vez que temos informações das posições de todos os nossos \textit{pacdots}.
   Caso algum tenha desaparecido, o agente irá se mover para a posição
@@ -216,10 +214,10 @@ Segue uma breve explicação de cada estado:
   pela patrulha do agente defensor, seja possível identificar rapidamente que
   nosso território foi invadido, assim como estimar a posição do atacante.
 
-  \item \textbf{Persegue oponente}: durante a patrulha e verificação previamente
+  \item \textbf{Perseguir oponente}: durante a patrulha e verificação previamente
   descritas, caso o agente veja um inimigo, ele passa a persegui-lo.
 
-  \item \textbf{Anda aleatoriamente entre os \textit{pacdots} restantes}: ao fim do jogo,
+  \item \textbf{Vigiar \textit{pacdots}}: ao fim do jogo,
   quando o número de \textit{pacdots} a ser defendido é pequeno, é mais vatajoso
   que o defensor se desloque entre esses \textit{pacdots} ao invés de patrulhar a área
   central do mapa. Dessa forma, quando temos $4$ ou menos \textit{pacdots}, o agente passa
@@ -247,7 +245,7 @@ a complexidade temporal será da ordem de $O(cp)$, ou $O(p)$.
 
 \subsection{Agente Defensivo}
 Como pode ser observado na descrição do agente defensivo, a maioria das suas
-operações consiste em definir \textit{targets}. Tais operações são bastante
+operações consiste em definir alvos. Tais operações são bastante
 simples e possuem, no geral, custo constante em termos de tempo. A operação mais custosa do defensor
 é calcular e recalcular as probabilidades de visitar os pontos de patrulha. Para calcular tal
 probabilidade é necessário encontrar, para cada ponto de patrulha, o \textit{pacdot} mais próximo.
@@ -261,14 +259,14 @@ O time de agentes desenvolvido, batizado de \textit{MeuTime}, foi testado contra
 times fornecidos: o \textit{SimpleTeam} e o \textit{RandomTeam}. Além disso, foram
 realizados testes do \textit{MeuTime} contra ele mesmo. Para cada oponente, foram realizados
 $20$ jogos com o \textit{MeuTime} no território vermelho e $20$ jogos com o \textit{MeuTime}
-no território azul. Isso foi feito para avaliaro efeito do território no agente implementado.
+no território azul. Isso foi feito para avaliar o efeito do território no agente implementado.
 Os mapas foram gerados aleatoriamente para cada jogo, e o território de cada time
-possuia sempre $30$ \textit{pacdots}, ou seja, a pontuação máxima é $28$ pontos.
+possuia sempre $30$ \textit{pacdots}, ou seja, a pontuação máxima nesses testes é $28$ pontos.
 
 As simulações de Monte Carlo utilizadas pelo agente ofensivo do \textit{MeuTime} utilizaram
 profundidade $6$, e foram feitas $30$ simulações para avaliar cada ação. Essa escolha de números
-deixa o tempo de decisão do agente bastante baixo (cerca de $0,2$ segundos, um tempo bem abaixo
-do limite permitido), oferecendo ainda um bom resultado. Aumentando esses parâmetros é
+deixa o tempo de decisão do agente bastante baixo, oferecendo ainda um bom resultado.
+Aumentando esses parâmetros é
 possível melhorar o desempenho do agente, mas eles foram mantidos relativamente baixos
 para agilizar a execução dos diversos testes.
 
@@ -303,9 +301,9 @@ assim como o número de jogos empatados.
 Inicialmente é possível perceber que, como esperado, o time implementado independe do
 território. Os resultados são bastante parecidos para os territórios azul e vermelho.
 
-O \textit{MeuTime} mostrou um desempenho bastante satisfatório contra o \textit{SimpleTeam},
-ganhando aproximadamente $90\%$ dos jogos realizados com um \textit{score} de, em média,
-$7$ pontos.
+O \textit{MeuTime} mostrou um desempenho bastante satisfatório contra o \textit{SimpleTeam}
+em mapas aleatórios, ganhando aproximadamente $90\%$ dos jogos realizados com
+um \textit{score} de, em média, $7$ pontos.
 
 As tabelas a seguir mostram os resultados obtidos nos jogos contra o \textit{RandomTeam}.
 Novamente, as tabelas mostram o número de vitórias, derrotas e o \textit{score} médio
@@ -358,6 +356,18 @@ Pode-se perceber que, nesse caso, os jogos foram bastante equilibrados. Cada tim
 número de vezes. Além disso, o \textit{score} médio ficou próximo de $1$, ou seja, as vitórias foram
 por poucos pontos, o que indica que os jogos foram equilibrados. Esses resultados mostram, novamente,
 que o time implementado independe do território alocado.
+
+Além dos testes em mapas aleatórios, foram realizados testes contra o \textit{SimpleTeam} em
+todos os outros mapas fornecidos no diretório \textit{layout}. Nesses testes não foram feitas
+análises de número de vitórias, derrotas e pontuação média, mas o \textit{MeuTime} ganhou a grande
+maioria das partidas. No entanto, durante esses testes, foi possível perceber uma fraqueza
+do time desenvolvido. Em mapas muito simples e pequenos, como o \textit{tinyCapture}, onde cada
+time tem apenas um agente em um mapa muito pequeno, o time desenvolvido perdeu quase sempre para
+o \textit{SimpleTeam}. Isso ocorreu pois, nesse caso, a estratégia mais simples e direta do
+\textit{SimpleTeam} foi mais eficiente: ele acaba comendo todos os \textit{pacdots} mais rapidamente.
+O agente do \textit{MeuTime} perde tempo, por exemplo, se esquivando do agente inimigo, e acaba
+demorando mais para comer os \textit{pacdots}. Dessa forma, para certos tipos de mapas específicos,
+uma estratégia mais simples e direta é superior à estratégia do agente desenvolvido.
 
 Podemos concluir que o time desenvolvido apresentou um bom desempenho. Contra agentes muito simples,
 como o \textit{RandomTeam}, ele domina o jogo por completo. Com agentes um pouco mais complexos,
