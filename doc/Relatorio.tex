@@ -242,6 +242,11 @@ No entanto, $a$ é um número fixo (o agente pode escolher, no pior caso, entre 
 $d$ e $n$ também são fixados antes da execução. Sendo $c = 5 * d * n$, uma constante,
 a complexidade temporal será da ordem de $O(cp)$, ou $O(p)$.
 
+A complexidade espacial do agente ofensivo é constante. Durante as simulações e
+avaliações, somente constantes são armazenadas e cada simulação aleatória utiliza
+somente uma cópia do \textit{gamestate}. Dessa forma, considerando que o \textit{gamestate}
+ocupe um espaço constante, o agente ofensivo possui ordem de complexidade espacial
+constante.
 
 \subsection{Agente Defensivo}
 Como pode ser observado na descrição do agente defensivo, a maioria das suas
@@ -252,6 +257,12 @@ probabilidade é necessário encontrar, para cada ponto de patrulha, o \textit{p
 Sendo $x$ o número de pontos de patrulha (que varia dependendo do tamanho do mapa ou do número
 de paredes na área de encontro entre os dois territórios) e $p$ o número de \textit{pacdots}
 no nosso território, a complexidade temporal do agente defensivo é, no pior caso, $O(xp)$.
+
+A complexidade espacial do agente ofensivo é $O(p + c)$, sendo $p$ o número de \textit{pacdots}
+que serão defendidos e $c$ o número de pontos de patrulha no centro do mapa. Isso ocorre pois o
+agente defensivo sempre armazena a última observação dos \textit{pacdots} a serem defendidos
+(a posição de cada um dos $p$ \textit{pacdots}) e um dicionário com as posições de cada um dos $c$
+pontos de patrulha, associados com as probabilidades de escolher cada um deles.
 
 \section{Análise de desempenho e discussão dos resultados}
 
