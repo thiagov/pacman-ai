@@ -63,7 +63,7 @@ class EvaluationBasedAgent(CaptureAgent):
 
 
 class Attacker(EvaluationBasedAgent):
-  "Agente ofensivo."
+  "Gera Carlo, o agente ofensivo."
 
   def getFeatures(self, gameState, action):
     """
@@ -226,7 +226,7 @@ class Attacker(EvaluationBasedAgent):
     return toPlay
  
 class Defender(CaptureAgent):
-  "Agente defensivo."
+  "Gera Monte, o agente defensivo."
 
   def __init__(self, index):
     CaptureAgent.__init__(self, index)
