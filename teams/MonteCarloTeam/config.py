@@ -5,10 +5,10 @@ TeamName = 'MonteCarloTeam'
 AgentFactory = 'montecarloteam.MonteCarloFactory'
 
 # Nome completo dos alunos.
-Partners = ['Thiago1', 'Thiago2']
+Partners = ['Thiago Silva Vilela']
 
 # Parametros dos agentes (opcional).
 AgentArgs = {}
 
 # e-mails (opcional).
-NotifyList = ['fulano@silva.com', 'ciclano@soares.com']
+NotifyList = ['thiagov@dcc.ufmg.br']

@@ -266,15 +266,15 @@ pontos de patrulha, associados com as probabilidades de escolher cada um deles.
 
 \section{Análise de desempenho e discussão dos resultados}
 
-O time de agentes desenvolvido, batizado de \textit{MeuTime}, foi testado contra os dois
+O time de agentes desenvolvido, batizado de \textit{MonteCarloTeam}, foi testado contra os dois
 times fornecidos: o \textit{SimpleTeam} e o \textit{RandomTeam}. Além disso, foram
-realizados testes do \textit{MeuTime} contra ele mesmo. Para cada oponente, foram realizados
-$20$ jogos com o \textit{MeuTime} no território vermelho e $20$ jogos com o \textit{MeuTime}
+realizados testes do \textit{MonteCarloTeam} contra ele mesmo. Para cada oponente, foram realizados
+$20$ jogos com o \textit{MonteCarloTeam} no território vermelho e $20$ jogos com o \textit{MonteCarloTeam}
 no território azul. Isso foi feito para avaliar o efeito do território no agente implementado.
 Os mapas foram gerados aleatoriamente para cada jogo, e o território de cada time
 possuia sempre $30$ \textit{pacdots}, ou seja, a pontuação máxima nesses testes é $28$ pontos.
 
-As simulações de Monte Carlo utilizadas pelo agente ofensivo do \textit{MeuTime} utilizaram
+As simulações de Monte Carlo utilizadas pelo agente ofensivo do \textit{MonteCarloTeam} utilizaram
 profundidade $6$, e foram feitas $30$ simulações para avaliar cada ação. Essa escolha de números
 deixa o tempo de decisão do agente bastante baixo, oferecendo ainda um bom resultado.
 Aumentando esses parâmetros é
@@ -293,7 +293,7 @@ assim como o número de jogos empatados.
     Empates      & 0    \\ \hline
     Score médio  & 8.55 \\ \hline
     \end{tabular}
-    \caption{\textit{MeuTime} (vermelho) x \textit{SimpleTeam} (azul)}
+    \caption{\textit{MonteCarloTeam} (vermelho) x \textit{SimpleTeam} (azul)}
     }
 \end{table}
 
@@ -305,14 +305,14 @@ assim como o número de jogos empatados.
     Empates      & 0    \\ \hline
     Score médio  & -6.2 \\ \hline
     \end{tabular}
-    \caption{\textit{SimpleTeam} (vermelho) x \textit{MeuTime} (azul)}
+    \caption{\textit{SimpleTeam} (vermelho) x \textit{MonteCarloTeam} (azul)}
     }
 \end{table}
 
 Inicialmente é possível perceber que, como esperado, o time implementado independe do
 território. Os resultados são bastante parecidos para os territórios azul e vermelho.
 
-O \textit{MeuTime} mostrou um desempenho bastante satisfatório contra o \textit{SimpleTeam}
+O \textit{MonteCarloTeam} mostrou um desempenho bastante satisfatório contra o \textit{SimpleTeam}
 em mapas aleatórios, ganhando aproximadamente $90\%$ dos jogos realizados com
 um \textit{score} de, em média, $7$ pontos.
 
@@ -328,7 +328,7 @@ para o time vermelho.
     Empates      & 0  \\ \hline
     Score médio  & 28 \\ \hline
     \end{tabular}
-    \caption{\textit{MeuTime} (vermelho) x \textit{RandomTeam} (azul)}
+    \caption{\textit{MonteCarloTeam} (vermelho) x \textit{RandomTeam} (azul)}
     }
 \end{table}
 
@@ -340,15 +340,15 @@ para o time vermelho.
     Empates      & 0   \\ \hline
     Score médio  & -28 \\ \hline
     \end{tabular}
-    \caption{\textit{RandomTeam} (vermelho) x \textit{MeuTime} (azul)}
+    \caption{\textit{RandomTeam} (vermelho) x \textit{MonteCarloTeam} (azul)}
     }
 \end{table}
 
-Contra o \textit{RandomTeam}, o \textit{MeuTime} venceu $100\%$ das vezes. Além disso,
+Contra o \textit{RandomTeam}, o \textit{MonteCarloTeam} venceu $100\%$ das vezes. Além disso,
 ele venceu sempre com o \textit{score} máximo. Esse resultado não é tão surpreendente,
 uma vez que que o \textit{RandomTeam} possui um desempenho bastante ruim.
 
-A próxima tabela mostra os resultados obtidos pelo \textit{MeuTime} jogando contra
+A próxima tabela mostra os resultados obtidos pelo \textit{MonteCarloTeam} jogando contra
 ele mesmo.
 
 \begin{table}[htb!]
@@ -359,7 +359,7 @@ ele mesmo.
     Empates      & 0   \\ \hline
     Score médio  & 1.5 \\ \hline
     \end{tabular}
-    \caption{\textit{MeuTime} (vermelho) x \textit{MeuTime} (azul)}
+    \caption{\textit{MonteCarloTeam} (vermelho) x \textit{MonteCarloTeam} (azul)}
     }
 \end{table}
 
@@ -370,13 +370,13 @@ que o time implementado independe do território alocado.
 
 Além dos testes em mapas aleatórios, foram realizados testes contra o \textit{SimpleTeam} em
 todos os outros mapas fornecidos no diretório \textit{layout}. Nesses testes não foram feitas
-análises de número de vitórias, derrotas e pontuação média, mas o \textit{MeuTime} ganhou a grande
+análises de número de vitórias, derrotas e pontuação média, mas o \textit{MonteCarloTeam} ganhou a grande
 maioria das partidas. No entanto, durante esses testes, foi possível perceber uma fraqueza
 do time desenvolvido. Em mapas muito simples e pequenos, como o \textit{tinyCapture}, onde cada
 time tem apenas um agente em um mapa muito pequeno, o time desenvolvido perdeu quase sempre para
 o \textit{SimpleTeam}. Isso ocorreu pois, nesse caso, a estratégia mais simples e direta do
 \textit{SimpleTeam} foi mais eficiente: ele acaba comendo todos os \textit{pacdots} mais rapidamente.
-O agente do \textit{MeuTime} perde tempo, por exemplo, se esquivando do agente inimigo, e acaba
+O agente do \textit{MonteCarloTeam} perde tempo, por exemplo, se esquivando do agente inimigo, e acaba
 demorando mais para comer os \textit{pacdots}. Dessa forma, para certos tipos de mapas específicos,
 uma estratégia mais simples e direta é superior à estratégia do agente desenvolvido.
 
