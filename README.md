@@ -1,8 +1,8 @@
 # MCTS for Pacman Capture the Flag Contest
 
-This project implements an agent to participate in the Pacman Capture the Flag contest.
-
 ![screenshot](screen.png)
+
+This project implements an agent to participate in the Pacman Capture the Flag contest.
 
 More information on the contest can be found at: http://ai.berkeley.edu/contest.html. The contest rules can also be found on this link.
 
